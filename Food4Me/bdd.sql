@@ -55,3 +55,12 @@ CREATE TABLE composition_repas (
     id_ingredient UUID NOT NULL REFERENCES ingredient(id_ingredient) ON DELETE CASCADE,
     quantite_grammes NUMERIC NOT NULL
 );
+
+INSERT INTO profil (id_profil, id_utilisateur, nom, objectif)
+VALUES (
+    '93308442-16ea-4838-920a-a45fae6627ec', 
+    (SELECT id_utilisateur FROM utilisateur LIMIT 1), 
+    'Maxime Profil Final',
+    'Suivi Nutritionnel'
+)
+ON CONFLICT (id_profil) DO NOTHING; -- Évite l'erreur si tu l'as déjà créé

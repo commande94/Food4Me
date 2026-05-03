@@ -13,8 +13,13 @@ export default function App() {
 
   const API_URL = `http://192.168.1.141:3000/auth/${isLogin ? 'login' : 'register'}`;
 
-  // Fonction pour se connecter
+  // Fonction pour se connecter/s'inscrire
   const handleAuth = async () => {
+    if (!email || !password) {
+      Alert.alert("Erreur", "Veuillez remplir tous les champs");
+      return;
+    }
+
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -23,15 +28,34 @@ export default function App() {
       });
       const data = await response.json();
       if (response.ok) {
-        setUserToken(data.token); // On stocke le token, ça nous "connecte"
-        // TODO: Décoder le JWT pour récupérer l'ID utilisateur, ou modifie le backend pour renvoyer l'ID
-        // setUserId(data.userId); 
+        if (!isLogin) {
+          // Après inscription réussie
+          Alert.alert("Succès !", "Compte créé ! Vous êtes connecté.");
+          setUserToken(data.token);
+          setEmail('');
+          setPassword('');
+        } else {
+          // Après connexion réussie
+          setUserToken(data.token);
+          setEmail('');
+          setPassword('');
+        }
       } else {
-        Alert.alert("Erreur", "Identifiants incorrects");
+        Alert.alert("Erreur", data.error || "Identifiants incorrects");
       }
     } catch (error) {
       Alert.alert("Erreur", "Serveur injoignable");
     }
+  };
+
+  // Fonction pour se déconnecter
+  const handleLogout = () => {
+    setUserToken(null);
+    setEmail('');
+    setPassword('');
+    setProduct(null);
+    setSearchQuery('');
+    Alert.alert("Déconnecté", "Vous êtes bien déconnecté.");
   };
 
   // FONCTION POUR AJOUTER UN REPAS À LA BASE DE DONNÉES
@@ -86,6 +110,16 @@ export default function App() {
   if (userToken) {
     return (
       <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>🍽️ Food4Me</Text>
+          <TouchableOpacity 
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Text style={styles.logoutButtonText}>Déconnexion</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.title}>Recherche de produits</Text>
 
         <TextInput
@@ -175,10 +209,13 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9f9f9', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  header: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   title: { fontSize: 30, fontWeight: 'bold', color: '#2ecc71', marginBottom: 20 },
   input: { width: '100%', height: 50, backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 10, paddingHorizontal: 15, marginBottom: 15 },
   button: { width: '100%', height: 50, backgroundColor: '#2ecc71', borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  logoutButton: { paddingVertical: 10, paddingHorizontal: 15, backgroundColor: '#e74c3c', borderRadius: 8 },
+  logoutButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
   productCard: { marginTop: 30, padding: 20, backgroundColor: '#fff', borderRadius: 15, alignItems: 'center', width: '100%' },
   productImg: { width: 100, height: 100, marginBottom: 10 },
   productName: { fontSize: 18, fontWeight: 'bold' },

@@ -1,7 +1,5 @@
--- 1. Activer l'extension pour les identifiants uniques
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Table Utilisateur
 CREATE TABLE utilisateur (
     id_utilisateur UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email TEXT UNIQUE NOT NULL,
@@ -10,7 +8,7 @@ CREATE TABLE utilisateur (
     derniere_connexion TIMESTAMPTZ
 );
 
--- 3. Table Profil 
+ 
 CREATE TABLE profil (
     id_profil UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_utilisateur UUID NOT NULL REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
@@ -19,17 +17,16 @@ CREATE TABLE profil (
     genre TEXT,
     taille_cm INT,
     poids_kg INT,
-    objectif TEXT NOT NULL, -- ex: perte de poids, gain de masse
-    calories_cible_journaliere INT, -- Utile pour la synthèse Lifesum
-    preferences_alimentaires TEXT, -- Allergies et goûts
+    objectif TEXT NOT NULL, 
+    calories_cible_journaliere INT, 
+    preferences_alimentaires TEXT, 
     date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Table Ingredient 
 CREATE TABLE ingredient (
     id_ingredient UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     nom TEXT NOT NULL,
-    code_barre TEXT, -- Indispensable pour le scanner
+    code_barre TEXT,
     calories_pour_100g NUMERIC NOT NULL,
     proteines_pour_100g NUMERIC NOT NULL,
     glucides_pour_100g NUMERIC NOT NULL,
@@ -38,17 +35,15 @@ CREATE TABLE ingredient (
     id_externe_api TEXT
 );
 
--- 5. Table Repas
 CREATE TABLE repas (
     id_repas UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_profil UUID NOT NULL REFERENCES profil(id_profil) ON DELETE CASCADE,
     nom_repas TEXT,
     date_repas TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    type_repas TEXT, -- Petit-déjeuner, Déjeuner, etc.
+    type_repas TEXT, 
     date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. Table Composition 
 CREATE TABLE composition_repas (
     id_composition UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_repas UUID NOT NULL REFERENCES repas(id_repas) ON DELETE CASCADE,
@@ -63,4 +58,63 @@ VALUES (
     'Maxime Profil Final',
     'Suivi Nutritionnel'
 )
-ON CONFLICT (id_profil) DO NOTHING; -- Évite l'erreur si tu l'as déjà créé
+ON CONFLICT (id_profil) DO NOTHING; 
+
+
+DROP TABLE IF EXISTS composition_repas;
+DROP TABLE IF EXISTS repas;
+DROP TABLE IF EXISTS ingredient;
+
+CREATE TABLE ingredient (
+    id_ingredient BIGSERIAL PRIMARY KEY,
+
+    nom TEXT NOT NULL,
+
+    code_barre TEXT UNIQUE,
+
+    calories_pour_100g NUMERIC(6,2) NOT NULL,
+    proteines_pour_100g NUMERIC(6,2) NOT NULL,
+    glucides_pour_100g NUMERIC(6,2) NOT NULL,
+    lipides_pour_100g NUMERIC(6,2) NOT NULL,
+
+    source TEXT DEFAULT 'OpenFoodFacts',
+
+    id_externe_api TEXT
+);
+
+CREATE TABLE repas (
+    id_repas BIGSERIAL PRIMARY KEY,
+
+    id_profil UUID NOT NULL
+        REFERENCES profil(id_profil)
+        ON DELETE CASCADE,
+
+    nom_repas TEXT,
+
+    date_repas TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    type_repas TEXT CHECK (
+        type_repas IN (
+            'petit_dejeuner',
+            'dejeuner',
+            'diner',
+            'collation'
+        )
+    ),
+
+    date_creation TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE composition_repas (
+    id_composition BIGSERIAL PRIMARY KEY,
+
+    id_repas BIGINT NOT NULL
+        REFERENCES repas(id_repas)
+        ON DELETE CASCADE,
+
+    id_ingredient BIGINT NOT NULL
+        REFERENCES ingredient(id_ingredient)
+        ON DELETE CASCADE,
+
+    quantite_grammes NUMERIC(6,2) NOT NULL
+);

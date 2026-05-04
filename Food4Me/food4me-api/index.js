@@ -53,7 +53,7 @@ app.post('/auth/login', async (req, res) => {
             return res.status(401).json("Email ou mot de passe incorrect");
         }
 
-        // 3. Générer un Token JWT (le badge d'accès pour Maxime)
+        // 3. Générer un Token JWT 
         const token = jwt.sign(
             { id: user.rows[0].id_utilisateur },
             process.env.JWT_SECRET,

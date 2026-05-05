@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { login, register } from "../services/authService";
+import { globalStyles } from "../styles/globalStyles";
+import { authStyles } from "../styles/authStyles";
+
 
 export default function AuthScreen({ onLogin }) {
     const [email, setEmail] = useState("");
@@ -27,18 +30,18 @@ export default function AuthScreen({ onLogin }) {
     };
 
     return (
-        <View>
-            <Text>Food4Me</Text>
+        <View style={globalStyles.container}>
+            <Text style={globalStyles.title}>Food4Me</Text>
 
-            <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
-            <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
+            <TextInput style={globalStyles.input} placeholder="Email" value={email} onChangeText={setEmail} />
+            <TextInput style={globalStyles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
 
-            <TouchableOpacity onPress={handleAuth}>
-                <Text>{isLogin ? "Login" : "Register"}</Text>
+            <TouchableOpacity style={globalStyles.button} onPress={handleAuth}>
+                <Text style={globalStyles.buttonText}>{isLogin ? "Login" : "Register"}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-                <Text>Changer mode</Text>
+                <Text style={authStyles.switchText} >Changer mode</Text>
             </TouchableOpacity>
         </View>
     );

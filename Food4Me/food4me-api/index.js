@@ -133,4 +133,23 @@ app.post('/repas/ajouter-complet', async (req, res) => {
     }
 });
 
+// ROUTE RECHERCHE INGRÉDIENT DANS MA BASE
+app.get('/ingredients/recherche', async (req, res) => {
+    try {
+        const { nom } = req.query;
+        const result = await pool.query(
+            "SELECT * FROM ingredient WHERE nom ILIKE $1 LIMIT 5",
+            [`%${nom}%`]
+        );
+        if (result.rows.length > 0) {
+            res.json({ ingredient: result.rows[0] }); // renvoie le premier trouvé
+        } else {
+            res.json({ ingredient: null });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erreur recherche ingrédient" });
+    }
+});
+
 app.listen(3000, () => console.log("Serveur démarré sur le port 3000"));

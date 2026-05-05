@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert, Image } from "react-native";
 import { searchProduct } from "../services/openFoodService";
 import { ajouterRepas } from "../services/foodService";
+import { globalStyles } from "../styles/globalStyles";
+import { homeStyles } from "../styles/homeStyles";
 
 export default function HomeScreen({ userId }) {
     const [query, setQuery] = useState("");
@@ -26,7 +28,7 @@ export default function HomeScreen({ userId }) {
     };
 
     return (
-        <View>
+        <View styles={globalStyles.container}>
             <Text>Recherche produit</Text>
 
             <TextInput

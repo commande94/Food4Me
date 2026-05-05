@@ -1,22 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 
+// 🔧 URL de l'API depuis les variables d'environnement
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.141:3000';
+
 export default function App() {
+  // États d'authentification
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const [userToken, setUserToken] = useState(null); // Si null = Login, si rempli = Accueil
+  const [userToken, setUserToken] = useState(null);
+
+  // Navigation post-connexion
+  const [currentScreen, setCurrentScreen] = useState('menu'); // 'menu', 'search', 'compose'
+
+  // Recherche produit
   const [product, setProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState(null); // ID de l'utilisateur connecté
+  const [lastQuery, setLastQuery] = useState('');
+  const searchTimeout = useRef(null);
 
-  const API_URL = `http://192.168.1.141:3000/auth/${isLogin ? 'login' : 'register'}`;
+  // Composition manuelle (placeholder)
+  const [ingredients, setIngredients] = useState('');
 
-  // Fonction pour se connecter/s'inscrire
+  const API_URL = `${API_BASE_URL}/auth/${isLogin ? 'login' : 'register'}`;
+
+  // ─── AUTH ────────────────────────────────────────
   const handleAuth = async () => {
     if (!email || !password) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs");
+      return;
+    }
+    if (!email.includes('@')) {
+      Alert.alert("Erreur", "Adresse email invalide");
       return;
     }
 
@@ -27,19 +44,14 @@ export default function App() {
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
+
       if (response.ok) {
         if (!isLogin) {
-          // Après inscription réussie
-          Alert.alert("Succès !", "Compte créé ! Vous êtes connecté.");
-          setUserToken(data.token);
-          setEmail('');
-          setPassword('');
-        } else {
-          // Après connexion réussie
-          setUserToken(data.token);
-          setEmail('');
-          setPassword('');
+          Alert.alert("Succès !", "Compte créé avec succès !");
         }
+        setUserToken(data.token);
+        setEmail('');
+        setPassword('');
       } else {
         Alert.alert("Erreur", data.error || "Identifiants incorrects");
       }
@@ -48,26 +60,25 @@ export default function App() {
     }
   };
 
-  // Fonction pour se déconnecter
   const handleLogout = () => {
     setUserToken(null);
     setEmail('');
     setPassword('');
     setProduct(null);
     setSearchQuery('');
+    setCurrentScreen('menu');
     Alert.alert("Déconnecté", "Vous êtes bien déconnecté.");
   };
 
-  // FONCTION POUR AJOUTER UN REPAS À LA BASE DE DONNÉES
+  // ─── AJOUT REPAS ────────────────────────────────
   const ajouterAuRepas = async () => {
     if (!product) return;
 
     try {
-      const response = await fetch("http://192.168.1.141:3000/repas/ajouter-complet", {
+      const response = await fetch(`${API_BASE_URL}/repas/ajouter-complet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // ON UTILISE TON NOUVEL ID ICI
           id_profil: "93308442-16ea-4838-920a-a45fae6627ec",
           nom_produit: product.product_name || "Produit inconnu",
           nutriments: {
@@ -90,139 +101,258 @@ export default function App() {
     }
   };
 
-  // FONCTION OPEN FOOD FACTS (Récupération de données)
-  const fetchProduct = async () => {
-    try {
-      // Test avec un code-barres connu (ex: Nutella)
-      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/3017620422003.json`);
-      const data = await response.json();
-      if (data.status === 1) {
-        setProduct(data.product);
-      } else {
-        Alert.alert("Erreur", "Produit non trouvé");
+  // ─── RECHERCHE OFF ──────────────────────────────
+  const handleSearch = () => {
+    const query = searchQuery.trim();
+    if (!query || loading) return;
+    if (query === lastQuery) return;
+
+    setLoading(true);
+    setLastQuery(query);
+
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+
+    searchTimeout.current = setTimeout(async () => {
+      try {
+        const url = `https://world.openfoodfacts.org/api/v1/search?search_terms=${encodeURIComponent(query)}&search_simple=1&json=1&page_size=5`;
+
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Food4Me - StageApp - Version 1.0'
+          }
+        });
+
+        if (response.status === 429) {
+          Alert.alert("Trop de requêtes", "Veuillez patienter avant de réessayer.");
+          setLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
+          Alert.alert("Erreur", `Erreur API : ${response.status}`);
+          setLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.products && data.products.length > 0) {
+          const foundProduct = data.products.find(p => p.product_name);
+          setProduct(foundProduct || data.products[0]);
+        } else {
+          Alert.alert("Aucun résultat", "Aucun produit trouvé pour cette recherche.");
+        }
+      } catch (error) {
+        Alert.alert("Erreur réseau", "Impossible de contacter OpenFoodFacts.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      Alert.alert("Erreur", "Impossible de contacter OpenFoodFacts");
-    }
+    }, 300);
   };
 
-  // SI CONNECTÉ : ÉCRAN PRINCIPAL
+  // ─── INTERFACE CONNECTÉE ─────────────────────────
   if (userToken) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>🍽️ Food4Me</Text>
-          <TouchableOpacity 
-            style={styles.logoutButton}
-            onPress={handleLogout}
-          >
-            <Text style={styles.logoutButtonText}>Déconnexion</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.title}>Recherche de produits</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Tape un produit (ex: steak, pomme...)"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={async () => {
-            if (!searchQuery || loading) return; // On bloque si c'est vide ou si on charge déjà
-
-            setLoading(true); // On active le chargement
-            try {
-              const response = await fetch(
-                `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&search_simple=1&action=process&json=1`,
-                {
-                  headers: {
-                    // REMPLACE PAR TON NOM OU NOM DE PROJET
-                    'User-Agent': 'Food4Me - StageApp - Version 1.0'
-                  }
-                }
-              );
-
-              const data = await response.json();
-
-              if (data.products && data.products.length > 0) {
-                const foundProduct = data.products.find(p => p.product_name);
-                setProduct(foundProduct || data.products[0]);
-              } else {
-                Alert.alert("Désolé", "Aucun produit trouvé.");
-              }
-            } catch (error) {
-              Alert.alert("Oups", "L'API sature un peu. Attends 2 secondes !");
-            } finally {
-              setLoading(false); // On réactive le bouton quoi qu'il arrive
-            }
-          }}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Recherche en cours..." : "Chercher sur OpenFoodFacts"}
-          </Text>
-        </TouchableOpacity>
-
-        {product && (
-          <View style={styles.productCard}>
-            <Image source={{ uri: product.image_front_url }} style={styles.productImg} />
-            <Text style={styles.productName}>{product.product_name}</Text>
-
-            {/* Affichage des valeurs nutritionnelles pour 100g */}
-            <View style={styles.statsContainer}>
-              <Text>🔥 Cal: {Math.round(product.nutriments?.['energy-kcal_100g'] || 0)} kcal</Text>
-              <Text>🥩 Protéines: {product.nutriments?.proteins_100g || 0}g</Text>
-              <Text>🍞 Glucides: {product.nutriments?.carbohydrates_100g || 0}g</Text>
-              <Text>🥑 Lipides: {product.nutriments?.fat_100g || 0}g</Text>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: '#3498db', marginTop: 15 }]}
-              onPress={ajouterAuRepas}
-            >
-              <Text style={styles.buttonText}>Ajouter ce repas</Text>
+    // ÉCRAN MENU
+    if (currentScreen === 'menu') {
+      return (
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>🍽️ Food4Me</Text>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutButtonText}>Déconnexion</Text>
             </TouchableOpacity>
           </View>
-        )}
-      </View>
-    );
+
+          <Text style={styles.menuTitle}>Que souhaitez-vous faire ?</Text>
+
+          <TouchableOpacity
+            style={[styles.menuButton, { backgroundColor: '#3498db' }]}
+            onPress={() => {
+              setSearchQuery('');
+              setProduct(null);
+              setCurrentScreen('search');
+            }}
+          >
+            <Text style={styles.menuButtonText}>🔍 Ajouter un repas préparé</Text>
+            <Text style={styles.menuButtonSub}>Rechercher un produit via OpenFoodFacts</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.menuButton, { backgroundColor: '#2ecc71' }]}
+            onPress={() => {
+              setIngredients('');
+              setCurrentScreen('compose');
+            }}
+          >
+            <Text style={styles.menuButtonText}>🥗 Composer votre repas</Text>
+            <Text style={styles.menuButtonSub}>Ajouter vos propres ingrédients</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // ÉCRAN RECHERCHE
+    if (currentScreen === 'search') {
+      return (
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setCurrentScreen('menu')}>
+              <Text style={styles.backLink}>← Retour</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>Recherche</Text>
+            <View style={{ width: 60 }} />
+          </View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Ex: Nutella, pomme, steak..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: loading ? '#95a5a6' : '#2ecc71' }]}
+            onPress={handleSearch}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "🔍 Recherche..." : "Chercher sur OpenFoodFacts"}
+            </Text>
+          </TouchableOpacity>
+
+          {product && (
+            <View style={styles.productCard}>
+              {product.image_front_url && (
+                <Image source={{ uri: product.image_front_url }} style={styles.productImg} />
+              )}
+              <Text style={styles.productName}>{product.product_name || "Produit inconnu"}</Text>
+              <Text style={styles.brandText}>{product.brands || "Marque inconnue"}</Text>
+
+              <View style={styles.statsContainer}>
+                <Text>🔥 Calories: {Math.round(product.nutriments?.['energy-kcal_100g'] || 0)} kcal</Text>
+                <Text>🥩 Protéines: {product.nutriments?.proteins_100g || 0}g</Text>
+                <Text>🍞 Glucides: {product.nutriments?.carbohydrates_100g || 0}g</Text>
+                <Text>🥑 Lipides: {product.nutriments?.fat_100g || 0}g</Text>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: '#3498db', marginTop: 15 }]}
+                onPress={ajouterAuRepas}
+              >
+                <Text style={styles.buttonText}>✓ Ajouter ce repas</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      );
+    }
+
+    // ÉCRAN COMPOSITION
+    if (currentScreen === 'compose') {
+      return (
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setCurrentScreen('menu')}>
+              <Text style={styles.backLink}>← Retour</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>Composer mon repas</Text>
+            <View style={{ width: 60 }} />
+          </View>
+
+          <Text style={styles.subtitle}>Ajoutez vos ingrédients manuellement (bientôt disponible)</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Ingrédients (ex: 200g poulet, 100g riz)"
+            value={ingredients}
+            onChangeText={setIngredients}
+            multiline
+          />
+
+          <TouchableOpacity style={[styles.button, { backgroundColor: '#2ecc71' }]}>
+            <Text style={styles.buttonText}>Calculer les valeurs nutritionnelles</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
   }
 
-  // SI NON CONNECTÉ : ÉCRAN LOGIN (Ton code actuel)
+  // ─── UI LOGIN/REGISTER ───────────────────────────
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Food4Me</Text>
-      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" />
-      <TextInput style={styles.input} placeholder="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry />
-      <TouchableOpacity style={styles.button} onPress={handleAuth}>
-        <Text style={styles.buttonText}>{isLogin ? 'Se connecter' : "S'inscrire"}</Text>
+      <Text style={styles.title}>
+        {isLogin ? 'Connexion' : 'Inscription'}
+      </Text>
+      <Text style={styles.subtitle}>
+        {isLogin ? 'Bienvenue ! Connecte-toi.' : 'Crée un compte pour commencer.'}
+      </Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Mot de passe"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: isLogin ? '#2ecc71' : '#3498db' }]}
+        onPress={handleAuth}
+      >
+        <Text style={styles.buttonText}>
+          {isLogin ? 'Se connecter' : "S'inscrire"}
+        </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => setIsLogin(!isLogin)} style={{ marginTop: 20 }}>
-        <Text style={{ color: '#3498db' }}>{isLogin ? "Pas de compte ? S'inscrire" : "Déjà un compte ? Login"}</Text>
+
+      <TouchableOpacity
+        onPress={() => setIsLogin(!isLogin)}
+        style={{ marginTop: 25, padding: 10 }}
+      >
+        <Text style={styles.switchLink}>
+          {isLogin ? "Pas de compte ? S'inscrire" : "Déjà un compte ? Se connecter"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
 
+// ─── STYLES ────────────────────────────────────────
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9f9f9', alignItems: 'center', justifyContent: 'center', padding: 20 },
   header: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  title: { fontSize: 30, fontWeight: 'bold', color: '#2ecc71', marginBottom: 20 },
-  input: { width: '100%', height: 50, backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 10, paddingHorizontal: 15, marginBottom: 15 },
-  button: { width: '100%', height: 50, backgroundColor: '#2ecc71', borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  title: { fontSize: 30, fontWeight: 'bold', color: '#2ecc71', marginBottom: 10 },
+  subtitle: { fontSize: 16, color: '#7f8c8d', marginBottom: 25, textAlign: 'center' },
+  input: { width: '100%', height: 50, backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 10, paddingHorizontal: 15, marginBottom: 15, fontSize: 14 },
+  button: { width: '100%', height: 50, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   logoutButton: { paddingVertical: 10, paddingHorizontal: 15, backgroundColor: '#e74c3c', borderRadius: 8 },
   logoutButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
-  productCard: { marginTop: 30, padding: 20, backgroundColor: '#fff', borderRadius: 15, alignItems: 'center', width: '100%' },
-  productImg: { width: 100, height: 100, marginBottom: 10 },
-  productName: { fontSize: 18, fontWeight: 'bold' },
+  productCard: { marginTop: 20, padding: 20, backgroundColor: '#fff', borderRadius: 15, alignItems: 'center', width: '100%' },
+  productImg: { width: 120, height: 120, marginBottom: 10, borderRadius: 10 },
+  productName: { fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
   brandText: { fontSize: 14, color: '#666', marginVertical: 5 },
-  nutriBadge: { marginTop: 10, paddingVertical: 8, paddingHorizontal: 12, backgroundColor: '#2ecc71', borderRadius: 8 },
-  nutriText: { color: '#fff', fontWeight: 'bold', fontSize: 12 },
-  addMealButton: { marginTop: 15, paddingVertical: 10, paddingHorizontal: 20, backgroundColor: '#e74c3c', borderRadius: 8 },
-  addMealButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
-  statsContainer: { marginTop: 15, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 8, width: '100%' }
+  statsContainer: { marginTop: 15, padding: 15, backgroundColor: '#f0f0f0', borderRadius: 8, width: '100%' },
+  switchLink: { color: '#2980b9', fontSize: 16, fontWeight: '500', textAlign: 'center' },
+
+  // Nouveaux styles pour le menu
+  menuTitle: { fontSize: 22, fontWeight: '600', color: '#2c3e50', marginBottom: 30, marginTop: 20 },
+  menuButton: {
+    width: '100%',
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    marginBottom: 15,
+    alignItems: 'center',
+  },
+  menuButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+  menuButtonSub: { color: 'rgba(255,255,255,0.8)', fontSize: 13 },
+  backLink: { color: '#3498db', fontSize: 16, fontWeight: '600' },
 });

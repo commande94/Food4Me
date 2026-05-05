@@ -13,9 +13,9 @@ app.post('/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // 1 on vérifsi l'utilisateur existe déjà
+        // 1 on vérifie si l'utilisateur existe déjà
         const userExist = await pool.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
-        if (userExist.rows.length !== 0) return res.status(401).send("L'email est déjà utilisé.");
+        if (userExist.rows.length !== 0) return res.status(401).json({ error: "L'email est déjà utilisé." });
 
         // 2 on "hashe" le mot de passe
         const salt = await bcrypt.genSalt(10);
@@ -23,14 +23,21 @@ app.post('/auth/register', async (req, res) => {
 
         // 3 on enregistre dans postgreSQL
         const newUser = await pool.query(
-            "INSERT INTO utilisateur (email, mot_de_passe_hash) VALUES ($1, $2) RETURNING *",
+            "INSERT INTO utilisateur (email, mot_de_passe_hash) VALUES ($1, $2) RETURNING id_utilisateur",
             [email, bcryptPassword]
         );
 
-        res.json({ message: "Compte créé avec succès !" });
+        // 4 on génère un JWT token pour la connexion automatique
+        const token = jwt.sign(
+            { id: newUser.rows[0].id_utilisateur },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.json({ token, message: "Compte créé avec succès ! Vous êtes maintenant connecté." });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send("Erreur serveur");
+        res.status(500).json({ error: "Erreur serveur" });
     }
 });
 

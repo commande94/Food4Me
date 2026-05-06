@@ -28,34 +28,34 @@ export default function HomeScreen({ userId }) {
     };
 
     return (
-        <View styles={globalStyles.container}>
-            <Text>Recherche produit</Text>
+        <View style={globalStyles.container}>
+            <Text style={globalStyles.title} >Recherche produit</Text>
 
-            <TextInput
+            <TextInput style={globalStyles.input}
                 placeholder="ex: nutella"
                 value={query}
                 onChangeText={setQuery}
             />
 
-            <TouchableOpacity onPress={handleSearch}>
-                <Text>{loading ? "..." : "Rechercher"}</Text>
+            <TouchableOpacity style={globalStyles.button} onPress={handleSearch}>
+                <Text style={globalStyles.buttonText}>{loading ? "..." : "Rechercher"}</Text>
             </TouchableOpacity>
 
             {product && (
-                <View>
-                    <Image
+                <View style={homeStyles.productCard}>
+                    <Image style={homeStyles.productImg}
                         source={{ uri: product.image_front_url }}
                         style={{ width: 100, height: 100 }}
                     />
 
-                    <Text>{product.product_name}</Text>
+                    <Text style={homeStyles.productName}>{product.product_name}</Text>
 
-                    <Text>
+                    <Text style={homeStyles.statsContainer}>
                         Calories: {product.nutriments?.["energy-kcal_100g"]}
                     </Text>
 
-                    <TouchableOpacity onPress={handleAdd}>
-                        <Text>Ajouter repas</Text>
+                    <TouchableOpacity style={globalStyles.button} onPress={handleAdd}>
+                        <Text style={globalStyles.buttonText}>Ajouter repas</Text>
                     </TouchableOpacity>
                 </View>
             )}

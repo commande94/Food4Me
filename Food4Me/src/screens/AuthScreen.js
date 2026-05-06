@@ -1,48 +1,58 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
-import { login, register } from "../services/authService";
-import { globalStyles } from "../styles/globalStyles";
-import { authStyles } from "../styles/authStyles";
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    Alert
+} from "react-native";
 
+import styles from "../styles/authStyles";
 
-export default function AuthScreen({ onLogin }) {
+export default function RegisterScreen({ navigation }) {
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [isLogin, setIsLogin] = useState(true);
 
-    const handleAuth = async () => {
-        try {
-            const data = isLogin
-                ? await login(email, password)
-                : await register(email, password);
-
-            if (data?.token) {
-                onLogin(
-                    data.token,
-                    data.userId || "93308442-16ea-4838-920a-a45fae6627ec"
-                );
-            } else {
-                Alert.alert("Erreur", "Login incorrect");
-            }
-        } catch (e) {
-            Alert.alert("Erreur serveur");
-        }
+    const handleRegister = () => {
+        Alert.alert("Inscription", "Compte créé !");
     };
 
     return (
-        <View style={globalStyles.container}>
-            <Text style={globalStyles.title}>Food4Me</Text>
+        <View style={styles.container}>
 
-            <TextInput style={globalStyles.input} placeholder="Email" value={email} onChangeText={setEmail} />
-            <TextInput style={globalStyles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
+            <Text style={styles.title}>Food4me</Text>
 
-            <TouchableOpacity style={globalStyles.button} onPress={handleAuth}>
-                <Text style={globalStyles.buttonText}>{isLogin ? "Login" : "Register"}</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+            />
+
+            <TextInput
+                style={styles.input}
+                placeholder="Mot de passe"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+            />
+
+            <TouchableOpacity
+                style={styles.button}
+                onPress={handleRegister}
+            >
+                <Text style={styles.buttonText}>Se connecter</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-                <Text style={authStyles.switchText} >Changer mode</Text>
+            <TouchableOpacity
+                onPress={() => navigation.navigate("Register")}
+            >
+                <Text style={styles.link}>
+                    Pas de compte ? S'inscrire
+                </Text>
             </TouchableOpacity>
+
         </View>
     );
 }

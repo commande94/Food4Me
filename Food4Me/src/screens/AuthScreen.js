@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { KeyboardAvoidingView, Platform } from "react-native";
 import {
     View,
     Text,
@@ -19,40 +21,49 @@ export default function RegisterScreen({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
-
-            <Text style={styles.title}>Food4me</Text>
-
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Mot de passe"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-            />
-
-            <TouchableOpacity
-                style={styles.button}
-                onPress={handleRegister}
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+            <KeyboardAwareScrollView
+                contentContainerStyle={styles.container}
+                enableOnAndroid
+                extraScrollHeight={20}
+                keyboardShouldPersistTaps="handled"
             >
-                <Text style={styles.buttonText}>Se connecter</Text>
-            </TouchableOpacity>
+                <Text style={styles.title}>Food4me</Text>
 
-            <TouchableOpacity
-                onPress={() => navigation.navigate("Register")}
-            >
-                <Text style={styles.link}>
-                    Pas de compte ? S'inscrire
-                </Text>
-            </TouchableOpacity>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                />
 
-        </View>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Mot de passe"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                />
+
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleRegister}
+                >
+                    <Text style={styles.buttonText}>Se connecter</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Register")}
+                >
+                    <Text style={styles.link}>
+                        Pas de compte ? S'inscrire
+                    </Text>
+                </TouchableOpacity>
+
+            </KeyboardAwareScrollView>
+        </KeyboardAvoidingView>
     );
 }

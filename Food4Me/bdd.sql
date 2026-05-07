@@ -52,3 +52,62 @@ CREATE TABLE composition_repas (
 
 ALTER TABLE profil
 ADD COLUMN prenom TEXT;
+
+
+DROP TABLE IF EXISTS composition_repas;
+DROP TABLE IF EXISTS repas;
+DROP TABLE IF EXISTS ingredient;
+
+CREATE TABLE ingredient (
+    id_ingredient BIGSERIAL PRIMARY KEY,
+
+    nom TEXT NOT NULL,
+
+    code_barre TEXT UNIQUE,
+
+    calories_pour_100g NUMERIC(6,2) NOT NULL,
+    proteines_pour_100g NUMERIC(6,2) NOT NULL,
+    glucides_pour_100g NUMERIC(6,2) NOT NULL,
+    lipides_pour_100g NUMERIC(6,2) NOT NULL,
+
+    source TEXT DEFAULT 'OpenFoodFacts',
+
+    id_externe_api TEXT
+);
+
+CREATE TABLE repas (
+    id_repas BIGSERIAL PRIMARY KEY,
+
+    id_profil UUID NOT NULL
+        REFERENCES profil(id_profil)
+        ON DELETE CASCADE,
+
+    nom_repas TEXT,
+
+    date_repas TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    type_repas TEXT CHECK (
+        type_repas IN (
+            'petit_dejeuner',
+            'dejeuner',
+            'diner',
+            'collation'
+        )
+    ),
+
+    date_creation TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE composition_repas (
+    id_composition BIGSERIAL PRIMARY KEY,
+
+    id_repas BIGINT NOT NULL
+        REFERENCES repas(id_repas)
+        ON DELETE CASCADE,
+
+    id_ingredient BIGINT NOT NULL
+        REFERENCES ingredient(id_ingredient)
+        ON DELETE CASCADE,
+
+    quantite_grammes NUMERIC(6,2) NOT NULL
+);

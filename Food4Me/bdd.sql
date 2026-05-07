@@ -111,3 +111,9 @@ CREATE TABLE composition_repas (
 
     quantite_grammes NUMERIC(6,2) NOT NULL
 );
+
+ALTER TABLE profil
+DROP COLUMN age;
+
+ALTER TABLE profil
+ADD COLUMN date_naissance DATE;

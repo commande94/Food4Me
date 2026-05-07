@@ -8,7 +8,6 @@ CREATE TABLE utilisateur (
     derniere_connexion TIMESTAMPTZ
 );
 
- 
 CREATE TABLE profil (
     id_profil UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     id_utilisateur UUID NOT NULL REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
@@ -26,7 +25,7 @@ CREATE TABLE profil (
 CREATE TABLE ingredient (
     id_ingredient UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     nom TEXT NOT NULL,
-    code_barre TEXT,
+    code_barre TEXT, 
     calories_pour_100g NUMERIC NOT NULL,
     proteines_pour_100g NUMERIC NOT NULL,
     glucides_pour_100g NUMERIC NOT NULL,

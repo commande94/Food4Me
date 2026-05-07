@@ -4,106 +4,87 @@ export default StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor: "#f9f9f9",
+        backgroundColor: "#f2f4f8",
         padding: 20,
+        justifyContent: "space-between",
     },
 
-    /* PROGRESS */
-    progressContainer: {
+    /* HEADER */
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
         marginTop: 20,
     },
 
-    progressText: {
-        fontSize: 14,
-        color: "#666",
-        marginBottom: 10,
-    },
-
-    progressBar: {
+    progressWrap: {
+        flex: 1,
         height: 6,
-        backgroundColor: "#e5e5e5",
-        borderRadius: 10,
+        backgroundColor: "#e5e7eb",
+        borderRadius: 20,
+        marginHorizontal: 10,
         overflow: "hidden",
     },
 
-    progressFill: {
+    progress: {
         height: "100%",
-        backgroundColor: "#2ecc71",
+        backgroundColor: "#22c55e",
+        borderRadius: 20,
     },
 
-    /* BACK */
-    backButton: {
-        position: "absolute",
-        top: 50,
-        left: 15,
+    step: {
+        fontSize: 12,
+        color: "#666",
     },
 
-    /* CONTENT */
-    content: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-
+    /* CARD CENTER */
     card: {
-        width: "100%",
         backgroundColor: "#fff",
+        borderRadius: 25,
         padding: 25,
-        borderRadius: 16,
         shadowColor: "#000",
         shadowOpacity: 0.08,
-        shadowRadius: 10,
-        elevation: 4,
-        alignItems: "center",
+        shadowRadius: 20,
+        elevation: 5,
     },
 
-    label: {
-        fontSize: 18,
-        fontWeight: "600",
+    title: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#111",
+    },
+
+    subtitle: {
+        fontSize: 14,
+        color: "#888",
         marginBottom: 20,
-        color: "#222",
     },
 
+    /* INPUT */
     input: {
-        width: "100%",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#f9fafb",
         padding: 15,
-        borderRadius: 12,
+        borderRadius: 14,
         fontSize: 16,
+        borderWidth: 1,
+        borderColor: "#eee",
     },
 
-    /* CHOICES */
-    choice: {
-        width: "100%",
-        padding: 15,
-        borderRadius: 12,
-        backgroundColor: "#f5f5f5",
-        marginBottom: 10,
-        alignItems: "center",
-    },
-
-    choiceActive: {
-        backgroundColor: "#2ecc71",
-    },
-
-    choiceText: {
-        fontSize: 16,
-        color: "#333",
-        fontWeight: "500",
-    },
-
-    /* NEXT BUTTON */
-    nextButton: {
-        backgroundColor: "#2ecc71",
-        padding: 18,
+    /* BUTTON */
+    button: {
+        backgroundColor: "#22c55e",
+        padding: 16,
         borderRadius: 50,
         alignItems: "center",
-        marginBottom: 20,
+        marginTop: 20,
+        shadowColor: "#22c55e",
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 3,
     },
 
-    nextText: {
+    buttonText: {
         color: "#fff",
-        fontSize: 16,
         fontWeight: "600",
+        fontSize: 16,
     },
 });

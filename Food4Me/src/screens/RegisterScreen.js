@@ -145,7 +145,7 @@ export default function RegisterScreen({ navigation }) {
 
                 alert("Compte créé avec succès !");
 
-                navigation.navigate("Auth");
+                navigation.replace("Home");;
 
             } else {
 

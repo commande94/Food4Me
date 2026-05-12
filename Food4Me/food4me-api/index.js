@@ -3,7 +3,19 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('./db');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
+
+// ─── Chargement de la base Ciqual locale ─────────
+let alimentsCiqual = [];
+try {
+    const raw = fs.readFileSync(path.join(__dirname, 'aliments.json'), 'utf-8');
+    alimentsCiqual = JSON.parse(raw);
+    console.log(`✅ ${alimentsCiqual.length} aliments chargés depuis Ciqual`);
+} catch (err) {
+    console.error('❌ Impossible de charger aliments.json :', err.message);
+}
 
 const app = express();
 app.use(express.json());
@@ -225,17 +237,50 @@ app.post('/ingredients/ajouter', authenticateToken, async (req, res) => {
     }
 });
 
-// ─── PROXY OPEN FOOD FACTS (ULTIME) ──────────────
+// ─── RECHERCHE PRODUITS (Ciqual + OFF fallback) ──
 let lastOffRequestTime = 0;
 const MIN_OFF_INTERVAL = 1500;
 
+function transformCiqualToProduct(item) {
+    return {
+        code: `ciqual_${item.nom.replace(/\s+/g, '_')}`,
+        product_name: item.nom,
+        brands: "Aliment générique (Ciqual)",
+        image_front_url: null,
+        nutriments: {
+            "energy-kcal_100g": item.calories,
+            proteins_100g: item.proteines,
+            carbohydrates_100g: item.glucides,
+            fat_100g: item.lipides
+        }
+    };
+}
+
 app.get('/off/search', authenticateToken, async (req, res) => {
     try {
-        const { terme } = req.query;
-        if (!terme) return res.status(400).json({ error: "Terme de recherche requis" });
+        let { terme } = req.query;
+        if (!terme) {
+            return res.status(400).json({ error: "Terme de recherche requis" });
+        }
+        terme = terme.trim();
+        const termeLower = terme.toLowerCase();
 
         console.log(`\n==============================`);
-        console.log(`[OFF] Recherche : "${terme}"`);
+        console.log(`[Recherche] "${terme}"`);
+
+        // 1️⃣ Recherche locale Ciqual
+        const resultatsLocaux = alimentsCiqual
+            .filter(a => a.nom.toLowerCase().includes(termeLower))
+            .slice(0, 15);
+
+        if (resultatsLocaux.length > 0) {
+            const produits = resultatsLocaux.map(transformCiqualToProduct);
+            console.log(`✅ ${produits.length} résultat(s) trouvé(s) dans Ciqual`);
+            return res.json({ products: produits });
+        }
+
+        // 2️⃣ Fallback Open Food Facts
+        console.log(`[OFF] Aucun résultat local, recherche sur Open Food Facts`);
 
         const now = Date.now();
         if (now - lastOffRequestTime < MIN_OFF_INTERVAL) {
@@ -244,13 +289,10 @@ app.get('/off/search', authenticateToken, async (req, res) => {
         }
         lastOffRequestTime = Date.now();
 
-        // On change d'URL pour être sûrs d'éviter tout cache
-        const url = `https://world.openfoodfacts.org/api/v1/search?search_terms=${encodeURIComponent(terme)}&search_simple=1&json=1&page_size=10&nocache=${Date.now()}`;
-        console.log(`[OFF] URL : ${url}`);
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(terme)}&json=1&page_size=50&nocache=${Date.now()}`;
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
-
         const response = await fetch(url, {
             headers: { 'User-Agent': 'Food4Me/1.0' },
             signal: controller.signal
@@ -266,23 +308,36 @@ app.get('/off/search', authenticateToken, async (req, res) => {
         }
 
         const data = await response.json();
-        console.log(`[OFF] ${data.products?.length || 0} produits reçus`);
-        if (data.products && data.products.length > 0) {
-            console.log(`[OFF] Premier produit : "${data.products[0]?.product_name}"`);
+        let products = data.products || [];
+
+        // Filtrage strict par nom
+        let filtered = products.filter(p => {
+            const name = (p.product_name || '').toLowerCase();
+            return name.includes(termeLower);
+        });
+
+        // Si rien après filtrage, on prend les bruts
+        if (filtered.length === 0) {
+            console.log('[OFF] Aucun résultat après filtrage, utilisation des résultats bruts');
+            filtered = products;
         }
 
-        // Anti-cache response
+        // Tri par popularité
+        filtered.sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0));
+
+        const finalProducts = filtered.slice(0, 10);
+        console.log(`[OFF] ${finalProducts.length} produits renvoyés`);
+
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-        res.set('Pragma', 'no-cache');
-        res.set('Expires', '0');
-        res.set('Surrogate-Control', 'no-store');
-        res.json(data);
+        res.json({ products: finalProducts });
+
     } catch (error) {
-        console.error("[OFF] Erreur :", error);
+        console.error("[Recherche] Erreur :", error);
         res.status(500).json({ error: "Erreur lors de la recherche" });
     }
 });
 
+// ─── DÉMARRAGE ────────────────────────────────────
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Serveur backend démarré sur le port ${process.env.PORT || 3000}`);
 });

@@ -107,3 +107,39 @@ L’adresse IP de l’API (192.168.1.141) Change-la dans App.js (ligne 12 et 45)
 Le profil de test utilisé est 93308442-16ea-4838-920a-a45fae6627ec (inséré dans bdd.sql).
 
 Pense à ne jamais commiter le fichier .env (ajoute-le dans ton .gitignore).
+
+Derniere modifications :
+
+Pour le Derniere table ingrédient
+
+DROP TABLE IF EXISTS ingredient CASCADE;
+
+CREATE TABLE ingredient (
+    id_ingredient UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    nom TEXT NOT NULL UNIQUE,   -- UNIQUE obligatoire pour le ON CONFLICT du backend
+    code_barre TEXT,
+    calories_pour_100g NUMERIC NOT NULL,
+    proteines_pour_100g NUMERIC NOT NULL,
+    glucides_pour_100g NUMERIC NOT NULL,
+    lipides_pour_100g NUMERIC NOT NULL,
+    source TEXT DEFAULT 'OpenFoodFacts',
+    id_externe_api TEXT
+);
+
+Insert des data 
+
+INSERT INTO ingredient (nom, calories_pour_100g, proteines_pour_100g, glucides_pour_100g, lipides_pour_100g)
+VALUES
+    ('Pâtes', 350, 12, 70, 1.5),
+    ('Riz blanc', 130, 2.7, 28, 0.3),
+    ('Poulet', 165, 31, 0, 3.6),
+    ('Oeuf', 155, 13, 1.1, 11),
+    ('Pomme', 52, 0.3, 14, 0.2);
+
+Crée un profil si il y a des erreurs de profil
+
+INSERT INTO profil (id_utilisateur, nom, objectif)
+SELECT id_utilisateur, email, 'Suivi Nutritionnel'
+FROM utilisateur
+WHERE email = 'ton_email@test.com'
+  AND NOT EXISTS (SELECT 1 FROM profil WHERE profil.id_utilisateur = utilisateur.id_utilisateur);

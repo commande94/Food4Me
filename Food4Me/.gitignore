@@ -40,4 +40,12 @@ yarn-error.*
 /ios
 /android
 
-../.env
+/.env
+
+/food4me-api/.env
+
+../node_modules/
+
+.pakage-lock.json
+
+.package.json

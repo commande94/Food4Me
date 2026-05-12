@@ -1,8 +1,8 @@
 // App.js (racine du projet)
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.141:3000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.2:3000';
 
 export default function App() {
   // Auth
@@ -35,10 +35,13 @@ export default function App() {
   const [composeSearch, setComposeSearch] = useState('');
   const [composeFoundList, setComposeFoundList] = useState([]);
   const [composeFound, setComposeFound] = useState(null);
-  const [composeGrams, setComposeGrams] = useState('');
+  const [composeGrams, setComposeGrams] = useState('100');   // ← Grammes préremplis à 100
 
   // Synthèse du jour
   const [dailyTotals, setDailyTotals] = useState(null);
+
+  // Debounce pour recherche ingrédient en temps réel
+  const debounceRef = useRef(null);
 
   const API_URL = `${API_BASE_URL}/auth/${isLogin ? 'login' : 'register'}`;
 
@@ -98,7 +101,7 @@ export default function App() {
     Alert.alert("Déconnecté", "Vous êtes bien déconnecté.");
   };
 
-  // --- AJOUT REPAS ---
+  // --- AJOUT REPAS (produit scanné) ---
   const ajouterAuRepas = async () => {
     if (!selectedProduct) return;
     try {
@@ -124,6 +127,7 @@ export default function App() {
         fetchDailyTotals();
         setSelectedProduct(null);
         setSearchResults([]);
+        setCurrentScreen('menu');   // 🏠 Retour au menu automatique
       } else {
         const errorData = await response.json();
         Alert.alert("Erreur BDD", errorData.error || "Vérifie que le profil existe en base.");
@@ -133,8 +137,8 @@ export default function App() {
     }
   };
 
-  // --- RECHERCHE (simplifiée, sans délai excessif) ---
-  const handleSearch = () => {
+  // --- RECHERCHE PRODUITS (OpenFoodFacts) ---
+  const handleSearch = (autoRetry = false) => {
     const query = searchQuery.trim();
     if (!query || loading) return;
 
@@ -160,8 +164,14 @@ export default function App() {
       .then(response => {
         clearTimeout(timeoutId);
         if (response.status === 429) {
-          setSearchError({ message: "Trop de requêtes, veuillez patienter." });
+          setSearchError({ message: "Trop de requêtes, veuillez patienter 1 minute." });
           setLoading(false);
+          return;
+        }
+        if (response.status === 503) {
+          setSearchError({ message: "Service Open Food Facts momentanément indisponible. Nouvelle tentative automatique dans 5 secondes..." });
+          setLoading(false);
+          setTimeout(() => handleSearch(true), 5000);
           return;
         }
         if (!response.ok) {
@@ -188,15 +198,21 @@ export default function App() {
           setSearchError({ message: "Délai dépassé. Le serveur ne répond pas." });
         } else {
           setSearchError({ message: "Impossible de contacter le serveur." });
+          if (!autoRetry) {
+            setTimeout(() => handleSearch(true), 5000);
+          }
         }
         setLoading(false);
       });
   };
 
-  // --- COMPOSITION ---
+  // --- RECHERCHE INGRÉDIENT (en temps réel via useEffect) ---
   const handleSearchIngredient = async () => {
     const name = composeSearch.trim();
-    if (!name) return;
+    if (!name) {
+      setComposeFoundList([]);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE_URL}/ingredients/recherche?nom=${encodeURIComponent(name)}`);
       const data = await res.json();
@@ -204,13 +220,21 @@ export default function App() {
         setComposeFoundList(data.ingredients);
         setComposeFound(null);
       } else {
-        Alert.alert("Aucun ingrédient", "Cet ingrédient n'existe pas encore dans la base.");
         setComposeFoundList([]);
       }
     } catch (err) {
-      Alert.alert("Erreur", "Recherche ingrédient impossible.");
+      setComposeFoundList([]);
     }
   };
+
+  // useEffect pour déclencher la recherche avec debounce
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      handleSearchIngredient();
+    }, 300); // 300ms après la dernière frappe
+    return () => clearTimeout(debounceRef.current);
+  }, [composeSearch]);
 
   const selectIngredient = (ingredient) => {
     setComposeFound(ingredient);
@@ -237,7 +261,7 @@ export default function App() {
     setComposeSearch('');
     setComposeFound(null);
     setComposeFoundList([]);
-    setComposeGrams('');
+    setComposeGrams('100');   // Réinitialise à 100g
   };
 
   const removeIngredient = (index) => {
@@ -254,6 +278,7 @@ export default function App() {
     };
   }, { cal: 0, prot: 0, glu: 0, lip: 0 });
 
+  // --- SAUVEGARDE REPAS COMPOSÉ ---
   const saveComposedMeal = async () => {
     if (!composeNomRepas || composeItems.length === 0) {
       Alert.alert("Erreur", "Donnez un nom au repas et ajoutez au moins un ingrédient.");
@@ -284,6 +309,7 @@ export default function App() {
         setComposeItems([]);
         setComposeNomRepas('');
         fetchDailyTotals();
+        setCurrentScreen('menu');   // 🏠 Retour automatique au menu
       } else {
         const errorData = await response.json();
         Alert.alert("Erreur", errorData.error || "Sauvegarde impossible.");
@@ -315,7 +341,7 @@ export default function App() {
     }
   }, [currentScreen, userToken]);
 
-  // --- RENDU DES ÉCRANS (identique à avant) ---
+  // --- RENDU DES ÉCRANS ---
   if (userToken) {
     if (currentScreen === 'menu') {
       return (
@@ -345,7 +371,7 @@ export default function App() {
               setComposeSearch('');
               setComposeFound(null);
               setComposeFoundList([]);
-              setComposeGrams('');
+              setComposeGrams('100');   // prérempli à 100
               setCurrentScreen('compose');
             }}
           >
@@ -369,6 +395,8 @@ export default function App() {
     }
 
     if (currentScreen === 'search') {
+      // ... (inchangé par rapport à votre code actuel, avec le retour au menu après ajout déjà inclus)
+      // Je laisse votre version, elle contient déjà setCurrentScreen('menu') dans ajouterAuRepas
       return (
         <View style={styles.container}>
           <View style={styles.header}>
@@ -384,12 +412,12 @@ export default function App() {
             placeholder="Ex: Nutella, pomme, steak..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            onSubmitEditing={handleSearch}
+            onSubmitEditing={() => handleSearch(false)}
           />
 
           <TouchableOpacity
             style={[styles.button, { backgroundColor: loading ? '#95a5a6' : '#2ecc71' }]}
-            onPress={handleSearch}
+            onPress={() => handleSearch(false)}
             disabled={loading}
           >
             {loading ? (
@@ -405,7 +433,7 @@ export default function App() {
           {searchError && (
             <View style={styles.errorCard}>
               <Text style={styles.errorText}>{searchError.message}</Text>
-              <TouchableOpacity onPress={handleSearch}>
+              <TouchableOpacity onPress={() => handleSearch(false)}>
                 <Text style={styles.retryButton}>↻ Réessayer</Text>
               </TouchableOpacity>
             </View>
@@ -480,17 +508,14 @@ export default function App() {
               style={[styles.input, { flex: 2, marginBottom: 0 }]}
               placeholder="Ingrédient (ex: poulet)"
               value={composeSearch}
-              onChangeText={(text) => {
-                setComposeSearch(text);
-                if (text.length === 0) setComposeFoundList([]);
-              }}
-              onSubmitEditing={handleSearchIngredient}
+              onChangeText={setComposeSearch}   // la recherche se lance automatiquement
             />
             <TouchableOpacity style={[styles.button, { flex: 1, marginLeft: 10 }]} onPress={handleSearchIngredient}>
               <Text style={styles.buttonText}>🔍</Text>
             </TouchableOpacity>
           </View>
 
+          {/* Suggestions */}
           {composeFoundList.length > 0 && !composeFound && (
             <ScrollView style={styles.suggestionsContainer} nestedScrollEnabled={true}>
               {composeFoundList.map((ing) => (
@@ -558,49 +583,57 @@ export default function App() {
     }
   }
 
-  // --- LOGIN/REGISTER ---
+  // --- LOGIN/REGISTER (inchangé) ---
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>{isLogin ? 'Connexion' : 'Inscription'}</Text>
-        <Text style={styles.subtitle}>
-          {isLogin ? 'Bienvenue ! Connecte-toi.' : 'Crée un compte pour commencer.'}
-        </Text>
-        <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-        <TextInput style={styles.input} placeholder="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>{isLogin ? 'Connexion' : 'Inscription'}</Text>
+          <Text style={styles.subtitle}>
+            {isLogin ? 'Bienvenue ! Connecte-toi.' : 'Crée un compte pour commencer.'}
+          </Text>
+          <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
+          <TextInput style={styles.input} placeholder="Mot de passe" value={password} onChangeText={setPassword} secureTextEntry />
 
-        {!isLogin && (
-          <>
-            <Text style={styles.sectionTitle}>Profil (optionnel)</Text>
-            <View style={styles.row}>
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Taille (cm)" value={taille} onChangeText={setTaille} keyboardType="numeric" />
-              <TextInput style={[styles.input, { flex: 1, marginLeft: 10 }]} placeholder="Poids (kg)" value={poids} onChangeText={setPoids} keyboardType="numeric" />
-            </View>
-            <View style={styles.row}>
-              <TextInput style={[styles.input, { flex: 1 }]} placeholder="Âge" value={age} onChangeText={setAge} keyboardType="numeric" />
-              <TextInput style={[styles.input, { flex: 1, marginLeft: 10 }]} placeholder="Genre" value={genre} onChangeText={setGenre} />
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="Objectif (ex: perte de poids, maintien, prise de masse)"
-              value={objectif}
-              onChangeText={setObjectif}
-            />
-          </>
-        )}
+          {!isLogin && (
+            <>
+              <Text style={styles.sectionTitle}>Profil (optionnel)</Text>
+              <View style={styles.row}>
+                <TextInput style={[styles.input, { flex: 1 }]} placeholder="Taille (cm)" value={taille} onChangeText={setTaille} keyboardType="numeric" />
+                <TextInput style={[styles.input, { flex: 1, marginLeft: 10 }]} placeholder="Poids (kg)" value={poids} onChangeText={setPoids} keyboardType="numeric" />
+              </View>
+              <View style={styles.row}>
+                <TextInput style={[styles.input, { flex: 1 }]} placeholder="Âge" value={age} onChangeText={setAge} keyboardType="numeric" />
+                <TextInput style={[styles.input, { flex: 1, marginLeft: 10 }]} placeholder="Genre" value={genre} onChangeText={setGenre} />
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Objectif (ex: perte de poids, maintien, prise de masse)"
+                value={objectif}
+                onChangeText={setObjectif}
+              />
+            </>
+          )}
 
-        <TouchableOpacity style={[styles.button, { backgroundColor: isLogin ? '#2ecc71' : '#3498db' }]} onPress={handleAuth}>
-          <Text style={styles.buttonText}>{isLogin ? 'Se connecter' : "S'inscrire"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsLogin(!isLogin)} style={{ marginTop: 25, padding: 10 }}>
-          <Text style={styles.switchLink}>{isLogin ? "Pas de compte ? S'inscrire" : "Déjà un compte ? Se connecter"}</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity style={[styles.button, { backgroundColor: isLogin ? '#2ecc71' : '#3498db' }]} onPress={handleAuth}>
+            <Text style={styles.buttonText}>{isLogin ? 'Se connecter' : "S'inscrire"}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setIsLogin(!isLogin)} style={{ marginTop: 25, padding: 10 }}>
+            <Text style={styles.switchLink}>{isLogin ? "Pas de compte ? S'inscrire" : "Déjà un compte ? Se connecter"}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
-// --- STYLES (identiques) ---
+// --- STYLES (inchangés) ---
 const styles = StyleSheet.create({
   scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 20, backgroundColor: '#f9f9f9' },
   container: { flex: 1, backgroundColor: '#f9f9f9', alignItems: 'center', justifyContent: 'center', padding: 20 },

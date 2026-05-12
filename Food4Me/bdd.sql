@@ -64,3 +64,5 @@ VALUES (
     'Suivi Nutritionnel'
 )
 ON CONFLICT (id_profil) DO NOTHING; -- Évite l'erreur si tu l'as déjà créé
+
+CREATE EXTENSION IF NOT EXISTS unaccent;

@@ -1,13 +1,7 @@
 import React, { useState } from "react";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { KeyboardAvoidingView, Platform } from "react-native";
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    Alert
-} from "react-native";
+import { KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import styles from "../styles/authStyles";
 import { API_URL } from "../config/apiConfig";
@@ -17,17 +11,12 @@ export default function AuthScreen({ navigation }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    // 🔐 VALIDATIONS
-    const isEmailValid = (email) => {
-        return /\S+@\S+\.\S+/.test(email);
-    };
+    const isEmailValid = (email) => /\S+@\S+\.\S+/.test(email);
 
-    const isPasswordValid = (password) => {
-        return password.length >= 6;
-    };
+    const isPasswordValid = (password) => password.length >= 6;
 
-    // 🔐 LOGIN
     const handleLogin = async () => {
 
         setError("");
@@ -49,6 +38,8 @@ export default function AuthScreen({ navigation }) {
 
         try {
 
+            setLoading(true);
+
             const response = await fetch(`${API_URL}/auth/login`, {
                 method: "POST",
                 headers: {
@@ -64,8 +55,13 @@ export default function AuthScreen({ navigation }) {
 
             if (response.ok) {
 
+                // 🔐 STOCKAGE TOKEN (IMPORTANT)
+                await AsyncStorage.setItem("token", data.token);
+                await AsyncStorage.setItem("userId", data.userId.toString());
+
                 Alert.alert("Succès", "Connexion réussie !");
 
+                // 🚀 REDIRECTION HOME
                 navigation.replace("Home");
 
             } else {
@@ -75,9 +71,11 @@ export default function AuthScreen({ navigation }) {
 
         } catch (err) {
 
-            console.log(err);
+            console.log("LOGIN ERROR:", err);
 
-            setError("Erreur serveur");
+            setError("Erreur serveur ou réseau");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -88,8 +86,6 @@ export default function AuthScreen({ navigation }) {
         >
             <KeyboardAwareScrollView
                 contentContainerStyle={styles.container}
-                enableOnAndroid
-                extraScrollHeight={20}
                 keyboardShouldPersistTaps="handled"
             >
 
@@ -100,8 +96,8 @@ export default function AuthScreen({ navigation }) {
                     placeholder="Email"
                     value={email}
                     onChangeText={setEmail}
-                    keyboardType="email-address"
                     autoCapitalize="none"
+                    keyboardType="email-address"
                 />
 
                 <TextInput
@@ -123,11 +119,10 @@ export default function AuthScreen({ navigation }) {
                     onPress={handleLogin}
                 >
                     <Text style={styles.buttonText}>
-                        Se connecter
+                        {loading ? "Connexion..." : "Se connecter"}
                     </Text>
                 </TouchableOpacity>
 
-                {/* 👉 REGISTER LINK (on garde comme tu veux) */}
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Register")}
                 >

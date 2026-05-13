@@ -1,11 +1,14 @@
 import { API_URL } from "../config/apiConfig";
 
-export const ajouterRepas = async (product, userId) => {
+// Ajouter un repas scanné
+export const ajouterRepas = async (token, product) => {
     const response = await fetch(`${API_URL}/repas/ajouter-complet`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
-            id_profil: userId,
             nom_produit: product.product_name || "Produit inconnu",
             nutriments: {
                 cal: Math.round(product.nutriments?.["energy-kcal_100g"] || 0),
@@ -16,6 +19,28 @@ export const ajouterRepas = async (product, userId) => {
             quantite: 100,
         }),
     });
+    return response.json();
+};
 
-    return response;
+// Sauvegarder un repas composé
+export const saveComposedMeal = async (token, mealData) => {
+    const response = await fetch(`${API_URL}/repas/ajouter-complet`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(mealData),
+    });
+    return response.json();
+};
+
+// Récupérer les totaux du jour
+export const getDailyTotals = async (token) => {
+    const response = await fetch(`${API_URL}/repas/aujourdhui`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
 };

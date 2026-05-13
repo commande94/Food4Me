@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 
 export const homeStyles = StyleSheet.create({
-
+    // EXISTANTS (card, image, name, calories) – conservés
     card: {
         marginTop: 25,
         padding: 20,
@@ -14,7 +14,6 @@ export const homeStyles = StyleSheet.create({
         shadowRadius: 10,
         elevation: 4,
     },
-
     image: {
         width: 120,
         height: 120,
@@ -22,14 +21,12 @@ export const homeStyles = StyleSheet.create({
         marginBottom: 15,
         backgroundColor: "#f2f2f2",
     },
-
     name: {
         fontSize: 18,
         fontWeight: "700",
         textAlign: "center",
         marginBottom: 10,
     },
-
     calories: {
         fontSize: 15,
         color: "#444",
@@ -39,6 +36,85 @@ export const homeStyles = StyleSheet.create({
         width: "100%",
         textAlign: "center",
         marginBottom: 15,
-    }
-
+    },
+    // AJOUTS pour le menu
+    header: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: "bold",
+        color: "#2ecc71",
+    },
+    logoutButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        backgroundColor: "#e74c3c",
+        borderRadius: 8,
+    },
+    logoutButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 14,
+    },
+    menuTitle: {
+        fontSize: 22,
+        fontWeight: "600",
+        color: "#2c3e50",
+        marginBottom: 30,
+        marginTop: 20,
+    },
+    menuButton: {
+        width: "100%",
+        paddingVertical: 20,
+        paddingHorizontal: 15,
+        borderRadius: 12,
+        marginBottom: 15,
+        alignItems: "center",
+    },
+    menuButtonText: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 5,
+    },
+    menuButtonSub: {
+        color: "rgba(255,255,255,0.8)",
+        fontSize: 13,
+    },
+    dailyCard: {
+        width: "100%",
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+        marginTop: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    dailyTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#2c3e50",
+        marginBottom: 12,
+        textAlign: "center",
+    },
+    dailyRow: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-around",
+    },
+    dailyMacro: {
+        fontSize: 14,
+        color: "#555",
+        marginVertical: 4,
+        width: "45%",
+        textAlign: "center",
+    },
 });

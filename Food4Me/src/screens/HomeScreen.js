@@ -1,116 +1,84 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator } from "react-native";
-import { searchProduct } from "../services/openFoodService";
-import { ajouterRepas } from "../services/foodService";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getDailyTotals } from "../services/foodService";
 import { globalStyles } from "../styles/globalStyles";
 import { homeStyles } from "../styles/homeStyles";
 
-export default function HomeScreen({ navigation, route }) {
+export default function HomeScreen({ navigation }) {
+    const [token, setToken] = useState(null);
+    const [dailyTotals, setDailyTotals] = useState(null);
 
-    const userId = route?.params?.userId;
+    // Récupération du token au montage
+    useEffect(() => {
+        const loadToken = async () => {
+            const t = await AsyncStorage.getItem("token");
+            setToken(t);
+        };
+        loadToken();
+    }, []);
 
-    const [query, setQuery] = useState("");
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const handleSearch = async () => {
-
-        if (!query) {
-            Alert.alert("Erreur", "Tape un produit");
-            return;
+    const fetchTotals = useCallback(async () => {
+        if (!token) return;
+        try {
+            const data = await getDailyTotals(token);
+            setDailyTotals(data);
+        } catch (e) {
+            console.log("Erreur synthèse jour", e);
         }
+    }, [token]);
 
-        setLoading(true);
+    useEffect(() => {
+        fetchTotals();
+    }, [fetchTotals]);
 
-        const result = await searchProduct(query);
-
-        setProduct(result);
-
-        setLoading(false);
-    };
-
-    const handleAdd = async () => {
-
-        const res = await ajouterRepas(product, userId);
-
-        if (res?.ok) {
-            Alert.alert("Succès", "Repas ajouté !");
-        } else {
-            Alert.alert("Erreur");
-        }
+    const handleLogout = async () => {
+        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("userId");
+        navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
     };
 
     return (
         <View style={globalStyles.container}>
-
             {/* HEADER */}
-            <Text style={globalStyles.title}>
-                Food4Me 🍎
-            </Text>
+            <View style={homeStyles.header}>
+                <Text style={homeStyles.title}>🍽️ Food4Me</Text>
+                <TouchableOpacity style={homeStyles.logoutButton} onPress={handleLogout}>
+                    <Text style={homeStyles.logoutButtonText}>Déconnexion</Text>
+                </TouchableOpacity>
+            </View>
 
-            <Text style={{ color: "#666", marginBottom: 20 }}>
-                Rechercher un aliment et analyser ses valeurs nutritionnelles
-            </Text>
+            <Text style={homeStyles.menuTitle}>Que souhaitez-vous faire ?</Text>
 
-            {/* SEARCH */}
-            <TextInput
-                style={globalStyles.input}
-                placeholder="Ex: Nutella, banane..."
-                value={query}
-                onChangeText={setQuery}
-            />
-
-            <TouchableOpacity style={globalStyles.button} onPress={handleSearch}>
-                <Text style={globalStyles.buttonText}>
-                    {loading ? "Recherche..." : "Rechercher"}
-                </Text>
+            {/* BOUTONS DU MENU */}
+            <TouchableOpacity
+                style={[homeStyles.menuButton, { backgroundColor: "#3498db" }]}
+                onPress={() => navigation.navigate("Search", { token })}
+            >
+                <Text style={homeStyles.menuButtonText}>🔍 Ajouter un repas préparé</Text>
+                <Text style={homeStyles.menuButtonSub}>Rechercher un produit via OpenFoodFacts</Text>
             </TouchableOpacity>
 
-            {/* LOADING */}
-            {loading && (
-                <ActivityIndicator
-                    size="large"
-                    color="#2ecc71"
-                    style={{ marginTop: 20 }}
-                />
-            )}
+            <TouchableOpacity
+                style={[homeStyles.menuButton, { backgroundColor: "#2ecc71" }]}
+                onPress={() => navigation.navigate("Compose", { token })}
+            >
+                <Text style={homeStyles.menuButtonText}>🥗 Composer votre repas</Text>
+                <Text style={homeStyles.menuButtonSub}>Ajouter vos propres ingrédients</Text>
+            </TouchableOpacity>
 
-            {/* RESULT */}
-            {product && (
-                <View style={homeStyles.card}>
-
-                    <Image
-                        source={{ uri: product.image_front_url }}
-                        style={homeStyles.image}
-                    />
-
-                    <Text style={homeStyles.name}>
-                        {product.product_name || "Produit inconnu"}
-                    </Text>
-
-                    <Text style={homeStyles.calories}>
-                        🔥 Calories : {product.nutriments?.["energy-kcal_100g"] || "N/A"}
-                    </Text>
-
-                    <TouchableOpacity
-                        style={globalStyles.button}
-                        onPress={handleAdd}
-                    >
-                        <Text style={globalStyles.buttonText}>
-                            Ajouter au journal
-                        </Text>
-                    </TouchableOpacity>
-
+            {/* SYNTHÈSE DU JOUR */}
+            {dailyTotals && (
+                <View style={homeStyles.dailyCard}>
+                    <Text style={homeStyles.dailyTitle}>📊 Aujourd&apos;hui</Text>
+                    <View style={homeStyles.dailyRow}>
+                        <Text style={homeStyles.dailyMacro}>🔥 Calories : {dailyTotals.calories} kcal</Text>
+                        <Text style={homeStyles.dailyMacro}>🥩 Protéines : {dailyTotals.proteines} g</Text>
+                        <Text style={homeStyles.dailyMacro}>🍞 Glucides : {dailyTotals.glucides} g</Text>
+                        <Text style={homeStyles.dailyMacro}>🥑 Lipides : {dailyTotals.lipides} g</Text>
+                    </View>
                 </View>
             )}
-
-            {/* EMPTY STATE */}
-            {!product && !loading && (
-                <Text style={{ marginTop: 40, color: "#aaa", textAlign: "center" }}>
-                    Aucun produit recherché
-                </Text>
-            )}
-
         </View>
     );
 }

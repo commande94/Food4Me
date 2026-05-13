@@ -183,3 +183,16 @@ exports.login = async (req, res) => {
         });
     }
 };
+
+exports.me = async (req, res) => {
+    try {
+        const user = await pool.query(
+            "SELECT id_utilisateur, email FROM utilisateur WHERE id_utilisateur = $1",
+            [req.user.id]
+        );
+        if (user.rows.length === 0) return res.status(404).json({ error: "Utilisateur introuvable" });
+        res.json({ id: user.rows[0].id_utilisateur, email: user.rows[0].email });
+    } catch (err) {
+        res.status(500).json({ error: "Erreur serveur" });
+    }
+};

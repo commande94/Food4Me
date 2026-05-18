@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -12,6 +12,7 @@ export default function RegisterScreen({ navigation }) {
     const [step, setStep] = useState(1);
 
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const [form, setForm] = useState({
         email: "",
@@ -22,8 +23,8 @@ export default function RegisterScreen({ navigation }) {
         objectif: "",
         genre: "",
         dateNaissance: new Date(),
-        poids: "",
-        taille: "",
+        poids: 70,
+        taille: 170,
     });
 
     const updateField = (key, value) => {
@@ -35,8 +36,7 @@ export default function RegisterScreen({ navigation }) {
 
     const isEmailValid = (email) => /^\S+@\S+\.\S+$/.test(email);
 
-    const isPasswordValid = (password) =>
-        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password);
+    const isPasswordValid = (password) => password.length >= 6;
 
     const isValidNumber = (value, min, max) =>
         value >= min && value <= max;
@@ -76,7 +76,7 @@ export default function RegisterScreen({ navigation }) {
         if (step === 2) {
 
             if (!isPasswordValid(form.password)) {
-                setError("Mot de passe trop faible");
+                setError("Le mot de passe doit contenir au moins 6 caractères");
                 return;
             }
 
@@ -116,7 +116,9 @@ export default function RegisterScreen({ navigation }) {
             return;
         }
 
+        setLoading(true);
         try {
+            console.log("📤 Envoi de la requête vers:", `${API_URL}/auth/register`);
 
             const response = await fetch(
                 `${API_URL}/auth/register`,
@@ -132,31 +134,39 @@ export default function RegisterScreen({ navigation }) {
                         prenom: form.prenom,
                         objectif: form.objectif,
                         genre: form.genre,
-                        dateNaissance: form.dateNaissance,
-                        poids: form.poids,
-                        taille: form.taille
+                        dateNaissance: form.dateNaissance.toISOString(),
+                        poids: parseInt(form.poids),
+                        taille: parseInt(form.taille)
                     }),
                 }
             );
 
-            const data = await response.json();
+            console.log("📥 Réponse reçue - Status:", response.status);
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                console.log("❌ Erreur parsing JSON:", parseError);
+                setError("Erreur serveur: réponse invalide");
+                setLoading(false);
+                return;
+            }
+
+            console.log("📋 Données reçues:", data);
 
             if (response.ok) {
-
-                alert("Compte créé avec succès !");
-
-                navigation.replace("Home");;
-
+                Alert.alert("✅ Compte créé avec succès !");
+                navigation.replace("Home");
             } else {
-
                 setError(data.message || "Erreur lors de l'inscription");
             }
 
         } catch (error) {
-
-            console.log(error);
-
-            setError("Erreur serveur. Vérifie ton backend.");
+            console.log("❌ Erreur fetch:", error.message);
+            setError(`Erreur: ${error.message}. Vérifie que le backend est lancé sur ${API_URL}`);
+        } finally {
+            setLoading(false);
         }
     };
     const prevStep = () => {
@@ -317,7 +327,7 @@ export default function RegisterScreen({ navigation }) {
         >
             <KeyboardAwareScrollView
                 contentContainerStyle={styles.container}
-                keyboardShouldPersistTaps="handled"
+                keyboardShouldPersistTaps="always"
             >
 
                 <View style={styles.header}>
@@ -343,9 +353,9 @@ export default function RegisterScreen({ navigation }) {
                     {renderStep()}
                 </View>
 
-                <TouchableOpacity style={styles.button} onPress={nextStep}>
+                <TouchableOpacity style={styles.button} onPress={nextStep} disabled={loading}>
                     <Text style={styles.buttonText}>
-                        {step === totalSteps ? "Terminer" : "Continuer"}
+                        {loading ? "⏳ Création du compte..." : (step === totalSteps ? "✅ Terminer" : "Continuer")}
                     </Text>
                 </TouchableOpacity>
 

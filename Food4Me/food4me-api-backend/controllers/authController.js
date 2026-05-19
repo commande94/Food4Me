@@ -110,10 +110,10 @@ exports.register = async (req, res) => {
 
     } catch (err) {
 
-        console.error(err);
+        console.error("ERREUR REGISTER :", err);
 
         res.status(500).json({
-            message: "Erreur serveur"
+            message: err.message
         });
     }
 };

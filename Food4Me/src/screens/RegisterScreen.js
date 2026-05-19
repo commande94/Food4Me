@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -156,7 +157,7 @@ export default function RegisterScreen({ navigation }) {
             console.log("📋 Données reçues:", data);
 
             if (response.ok) {
-                Alert.alert("✅ Compte créé avec succès !");
+                Alert.alert("Compte créé avec succès !");
                 navigation.replace("Home");
             } else {
                 setError(data.message || "Erreur lors de l'inscription");

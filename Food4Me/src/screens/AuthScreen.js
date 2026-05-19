@@ -89,7 +89,7 @@ export default function AuthScreen({ navigation }) {
                 keyboardShouldPersistTaps="handled"
             >
 
-                <Text style={styles.title}>Food4Me 🍎</Text>
+                <Text style={styles.title}>Food4Me</Text>
 
                 <TextInput
                     style={styles.input}
@@ -123,7 +123,7 @@ export default function AuthScreen({ navigation }) {
                     </Text>
                 </TouchableOpacity>
 
-                {/* 👉 REGISTER LINK (on garde comme tu veux) */}
+                {/* REGISTER LINK */}
                 <TouchableOpacity
                     onPress={() => navigation.navigate("Register")}
                 >

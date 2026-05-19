@@ -157,14 +157,6 @@ export default function RegisterScreen({ navigation }) {
             console.log("📋 Données reçues:", data);
 
             if (response.ok) {
-                // Sauvegarde du token et userId pour que l'app utilise immédiatement la session
-                try {
-                    if (data.token) await AsyncStorage.setItem("token", data.token);
-                    if (data.userId) await AsyncStorage.setItem("userId", String(data.userId));
-                } catch (e) {
-                    console.log("Erreur stockage token:", e);
-                }
-
                 Alert.alert("Compte créé avec succès !");
                 navigation.replace("Home");
             } else {

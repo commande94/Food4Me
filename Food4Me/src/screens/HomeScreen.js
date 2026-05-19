@@ -119,8 +119,6 @@ export default function HomeScreen({ navigation }) {
                 </View>
             )}
 
-            {/* Dashboard accessible via bottom tab */}
-
             {profile?.objectif && (
                 <View style={homeStyles.objectiveCard}>
                     <Text style={homeStyles.objectiveTitle}>Votre objectif</Text>

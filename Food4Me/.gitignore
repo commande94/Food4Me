@@ -33,6 +33,12 @@ yarn-error.*
 # local env files
 .env*.local
 
+# ignore plain env files and backend env
+.env
+food4me-api-backend/.env
+
+# local api config (will keep an example in the repo)
+src/config/apiConfig.js
 # typescript
 *.tsbuildinfo
 

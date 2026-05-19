@@ -55,12 +55,18 @@ exports.ajouterRepasComplet = async (req, res) => {
 // GET /repas/aujourdhui (utilisé par HomeScreen)
 exports.aujourdhui = async (req, res) => {
     try {
+        console.log("📊 Récupération des totals du jour pour l'utilisateur:", req.user.id);
+
         const profil = await pool.query("SELECT id_profil FROM profil WHERE id_utilisateur = $1", [req.user.id]);
-        if (profil.rows.length === 0) return res.json({ calories: 0, proteines: 0, glucides: 0, lipides: 0 });
+        if (profil.rows.length === 0) {
+            console.log("⚠️ Aucun profil trouvé");
+            return res.json({ calories: 0, proteines: 0, glucides: 0, lipides: 0 });
+        }
 
         const id_profil = profil.rows[0].id_profil;
-        const today = new Date().toISOString().slice(0, 10);
 
+        // Utiliser AT TIME ZONE pour gérer les timezones correctement
+        // Récupérer la date du jour du serveur (supposé UTC)
         const result = await pool.query(
             `SELECT 
                 COALESCE(SUM(i.calories_pour_100g * c.quantite_grammes / 100.0), 0) as calories,
@@ -71,19 +77,23 @@ exports.aujourdhui = async (req, res) => {
              JOIN composition_repas c ON c.id_repas = r.id_repas
              JOIN ingredient i ON i.id_ingredient = c.id_ingredient
              WHERE r.id_profil = $1
-               AND r.date_repas::date = $2`,
-            [id_profil, today]
+               AND DATE(r.date_repas) = CURRENT_DATE`,
+            [id_profil]
         );
 
         const { calories, proteines, glucides, lipides } = result.rows[0];
-        res.json({
+
+        const totals = {
             calories: Math.round(calories),
             proteines: Math.round(proteines * 10) / 10,
             glucides: Math.round(glucides * 10) / 10,
             lipides: Math.round(lipides * 10) / 10
-        });
+        };
+
+        console.log("✅ Totals trouvés:", totals);
+        res.json(totals);
     } catch (err) {
-        console.error(err);
+        console.error("❌ Erreur synthèse:", err);
         res.status(500).json({ error: "Erreur synthèse" });
     }
 };

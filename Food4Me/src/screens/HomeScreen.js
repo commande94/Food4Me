@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDailyTotals } from "../services/foodService";
 import { globalStyles } from "../styles/globalStyles";
@@ -21,13 +22,23 @@ export default function HomeScreen({ navigation }) {
     const fetchTotals = useCallback(async () => {
         if (!token) return;
         try {
+            console.log("📊 Chargement des totals du jour...");
             const data = await getDailyTotals(token);
+            console.log("✅ Totals chargés:", data);
             setDailyTotals(data);
         } catch (e) {
-            console.log("Erreur synthèse jour", e);
+            console.error("❌ Erreur synthèse jour:", e);
         }
     }, [token]);
 
+    // Charger les totals quand l'écran est affiché
+    useFocusEffect(
+        useCallback(() => {
+            fetchTotals();
+        }, [fetchTotals])
+    );
+
+    // Charger les totals à l'initialisation aussi
     useEffect(() => {
         fetchTotals();
     }, [fetchTotals]);

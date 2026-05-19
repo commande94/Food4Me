@@ -19,3 +19,10 @@ export const register = async (email, password) => {
 
     return response.json();
 };
+
+export const me = async (token) => {
+    const response = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.json();
+};

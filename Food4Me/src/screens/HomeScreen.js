@@ -2,21 +2,68 @@ import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDailyTotals } from "../services/foodService";
+import { me as getProfile } from "../services/authService";
 import { globalStyles } from "../styles/globalStyles";
 import { homeStyles } from "../styles/homeStyles";
 
 export default function HomeScreen({ navigation }) {
     const [token, setToken] = useState(null);
     const [dailyTotals, setDailyTotals] = useState(null);
+    const [profile, setProfile] = useState(null);
+    const [calorieTarget, setCalorieTarget] = useState(null);
 
     // Récupération du token au montage
     useEffect(() => {
         const loadToken = async () => {
             const t = await AsyncStorage.getItem("token");
             setToken(t);
+            if (t) {
+                try {
+                    const user = await getProfile(t);
+                    if (user && user.profil) {
+                        setProfile(user.profil);
+                        const target = computeCalorieTarget(user.profil);
+                        setCalorieTarget(target);
+                    }
+                } catch (e) {
+                    console.log("Erreur récupération profil", e);
+                }
+            }
         };
         loadToken();
     }, []);
+
+    const computeCalorieTarget = (p) => {
+        if (!p) return null;
+        const weight = p.poids_kg || p.poids || 70;
+        const height = p.taille_cm || p.taille || 170;
+        const dob = p.date_naissance || p.dateNaissance || null;
+        let age = 30;
+        if (dob) {
+            const b = new Date(dob);
+            const today = new Date();
+            age = today.getFullYear() - b.getFullYear();
+            const m = today.getMonth() - b.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
+        }
+
+        const gender = (p.genre || p.sexe || "").toLowerCase();
+        const isMale = gender.startsWith("h") || gender.startsWith("m") || gender === "homme";
+
+        const bmr = Math.round(10 * weight + 6.25 * height - 5 * age + (isMale ? 5 : -161));
+
+        const activityFactor = 1.3; // default moderate sedentary
+        const maintenance = Math.round(bmr * activityFactor);
+
+        const objectif = (p.objectif || "Maintien").toLowerCase();
+        let target = maintenance;
+        if (objectif.includes("perte")) target = maintenance - 500;
+        else if (objectif.includes("prise")) target = maintenance + 500;
+
+        return target;
+    };
+
+    const remainingCalories = dailyTotals && calorieTarget ? calorieTarget - dailyTotals.calories : null;
 
     const fetchTotals = useCallback(async () => {
         if (!token) return;
@@ -42,11 +89,52 @@ export default function HomeScreen({ navigation }) {
         <View style={globalStyles.container}>
             {/* HEADER */}
             <View style={homeStyles.header}>
-                <Text style={homeStyles.title}>🍽️ Food4Me</Text>
+                <Text style={homeStyles.title}>Food4Me</Text>
                 <TouchableOpacity style={homeStyles.logoutButton} onPress={handleLogout}>
                     <Text style={homeStyles.logoutButtonText}>Déconnexion</Text>
                 </TouchableOpacity>
             </View>
+
+            {(dailyTotals || calorieTarget) && (
+                <View style={homeStyles.summaryCard}>
+                    <View style={homeStyles.summaryTop}>
+                        <View>
+                            <Text style={homeStyles.summaryLabel}>Calories consommées</Text>
+                            <Text style={homeStyles.summaryNumber}>{dailyTotals ? dailyTotals.calories : 0}</Text>
+                        </View>
+                        {calorieTarget && (
+                            <View style={homeStyles.summaryTargetBox}>
+                                <Text style={homeStyles.summaryTargetLabel}>Objectif calorique</Text>
+                                <Text style={homeStyles.summaryTargetNumber}>{calorieTarget} kcal</Text>
+                            </View>
+                        )}
+                    </View>
+                    {remainingCalories !== null && (
+                        <Text style={homeStyles.summaryHint}>
+                            {remainingCalories >= 0
+                                ? `Il vous reste ${remainingCalories} kcal pour atteindre votre objectif`
+                                : `Objectif dépassé de ${Math.abs(remainingCalories)} kcal`}
+                        </Text>
+                    )}
+                </View>
+            )}
+
+            {/* Dashboard accessible via bottom tab */}
+
+            {profile?.objectif && (
+                <View style={homeStyles.objectiveCard}>
+                    <Text style={homeStyles.objectiveTitle}>Votre objectif</Text>
+                    <Text style={homeStyles.objectiveText}>{profile.objectif}</Text>
+                    <Text style={homeStyles.objectiveHint}>
+                        {profile.objectif === "Perte de poids"
+                            ? "En douceur : réduisez légèrement les calories et privilégiez les protéines."
+                            : profile.objectif === "Prise de masse"
+                                ? "Ajoutez des repas riches et équilibrés pour soutenir la croissance musculaire."
+                                : "Conservez votre niveau actuel et surveillez votre apport quotidien."
+                        }
+                    </Text>
+                </View>
+            )}
 
             <Text style={homeStyles.menuTitle}>Que souhaitez-vous faire ?</Text>
 

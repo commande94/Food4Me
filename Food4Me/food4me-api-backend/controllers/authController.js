@@ -191,7 +191,19 @@ exports.me = async (req, res) => {
             [req.user.id]
         );
         if (user.rows.length === 0) return res.status(404).json({ error: "Utilisateur introuvable" });
-        res.json({ id: user.rows[0].id_utilisateur, email: user.rows[0].email });
+
+        const profil = await pool.query(
+            `SELECT nom, prenom, genre, date_naissance, taille_cm, poids_kg, objectif
+             FROM profil WHERE id_utilisateur = $1`,
+            [req.user.id]
+        );
+
+        const result = { id: user.rows[0].id_utilisateur, email: user.rows[0].email };
+        if (profil.rows.length > 0) {
+            result.profil = profil.rows[0];
+        }
+
+        res.json(result);
     } catch (err) {
         res.status(500).json({ error: "Erreur serveur" });
     }

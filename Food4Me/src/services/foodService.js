@@ -19,11 +19,19 @@ export const ajouterRepas = async (token, product) => {
             quantite: 100,
         }),
     });
+
+    if (!response.ok) {
+        console.error("❌ Erreur ajout repas:", response.status);
+        throw new Error(`Erreur ${response.status}`);
+    }
+
     return response.json();
 };
 
 // Sauvegarder un repas composé
 export const saveComposedMeal = async (token, mealData) => {
+    console.log("💾 Sauvegarde du repas composé:", mealData);
+
     const response = await fetch(`${API_URL}/repas/ajouter-complet`, {
         method: "POST",
         headers: {
@@ -32,15 +40,40 @@ export const saveComposedMeal = async (token, mealData) => {
         },
         body: JSON.stringify(mealData),
     });
-    return response.json();
+
+    if (!response.ok) {
+        console.error("❌ Erreur sauvegarde repas:", response.status);
+        throw new Error(`Erreur ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("✅ Repas sauvegardé:", data);
+    return data;
 };
 
 // Récupérer les totaux du jour
 export const getDailyTotals = async (token) => {
-    const response = await fetch(`${API_URL}/repas/aujourdhui`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-    return response.json();
+    try {
+        console.log("📤 Appel GET /repas/aujourdhui avec token...");
+
+        const response = await fetch(`${API_URL}/repas/aujourdhui`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        console.log("📥 Status réponse:", response.status);
+
+        if (!response.ok) {
+            console.error("❌ Erreur récupération totals:", response.status);
+            throw new Error(`Erreur ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("✅ Totals reçus:", data);
+        return data;
+    } catch (err) {
+        console.error("❌ Erreur fetching totals:", err);
+        throw err;
+    }
 };

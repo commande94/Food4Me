@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const offSearchController = require("../controllers/offSearchController");
-const authenticateToken = require("../middlewares/auth");
 
-router.get("/search", authenticateToken, offSearchController.search);
+// Public - pas d'authentification nécessaire pour chercher des produits
+router.get("/search", offSearchController.search);
 
 module.exports = router;

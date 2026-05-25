@@ -14,9 +14,11 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Picker } from "@react-native-picker/picker";
-
-import { supabase } from "../services/supabase";
 import styles from "../styles/registerStyles";
+import { supabase } from "../services/supabase";
+import { API_URL } from "../config/apiConfig";
+
+console.log("TEST SUPABASE =", supabase);
 
 export default function RegisterScreen({ navigation }) {
 
@@ -101,8 +103,6 @@ export default function RegisterScreen({ navigation }) {
         console.log("➡️ Étape actuelle :", step);
 
         setError("");
-
-        // VALIDATIONS
 
         if (step === 1 && !isEmailValid(form.email)) {
 
@@ -189,183 +189,58 @@ export default function RegisterScreen({ navigation }) {
             return;
         }
 
-        // ÉTAPE SUIVANTE
-
         if (step < totalSteps) {
-
             console.log("➡️ Passage étape suivante");
-
-            setStep(step + 1);
-
+            setStep(prev => prev + 1);
             return;
         }
-
-        // INSCRIPTION SUPABASE
 
         setLoading(true);
 
         try {
+            console.log("🚀 Début inscription backend");
+            console.log("📡 URL =", `${API_URL}/auth/register`);
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: form.email,
+                    password: form.password,
+                    nom: form.nom,
+                    prenom: form.prenom,
+                    objectif: form.objectif,
+                    genre: form.genre,
+                    dateNaissance: form.dateNaissance.toISOString(),
+                    poids: form.poids,
+                    taille: form.taille
+                })
+            });
 
-            console.log("📡 Vérification email existant...");
+            console.log("📡 STATUS =", response.status);
 
-            const {
-                data: existingUser,
-                error: existingError
-            } = await supabase
-                .from("utilisateur")
-                .select("*")
-                .eq("email", form.email)
-                .single();
+            const data = await response.json().catch(() => null);
 
-            console.log("📥 Résultat vérification :", existingUser);
+            console.log("📥 DATA =", data);
 
-            if (existingUser) {
-
-                console.log("❌ Email déjà utilisé");
-
-                setError("Cet email existe déjà");
-
+            if (!response.ok) {
+                setError(data?.message || "Erreur inscription");
                 setLoading(false);
-
                 return;
             }
 
-            if (
-                existingError &&
-                existingError.code !== "PGRST116"
-            ) {
+            await AsyncStorage.setItem("user", JSON.stringify(data));
 
-                console.log(
-                    "❌ Erreur vérification email :",
-                    existingError
-                );
-
-                setError("Erreur vérification email");
-
-                setLoading(false);
-
-                return;
-            }
-
-            console.log("🔐 Hash mot de passe...");
-
-            const hashedPassword =
-                await bcrypt.hash(form.password, 10);
-
-            console.log("✅ Hash créé");
-
-            console.log("📡 Création utilisateur...");
-
-            const {
-                data: userData,
-                error: userError
-            } = await supabase
-                .from("utilisateur")
-                .insert([
-                    {
-                        email: form.email,
-                        mot_de_passe_hash: hashedPassword
-                    }
-                ])
-                .select()
-                .single();
-
-            console.log("📥 Utilisateur créé :", userData);
-
-            if (userError) {
-
-                console.log(
-                    "❌ Erreur création utilisateur :",
-                    userError
-                );
-
-                setError(
-                    "Erreur création utilisateur"
-                );
-
-                setLoading(false);
-
-                return;
-            }
-
-            console.log("📡 Création profil...");
-
-            const age =
-                new Date().getFullYear()
-                - form.dateNaissance.getFullYear();
-
-            const {
-                data: profileData,
-                error: profileError
-            } = await supabase
-                .from("profil")
-                .insert([
-                    {
-                        id_utilisateur:
-                            userData.id_utilisateur,
-
-                        nom: form.nom,
-
-                        prenom: form.prenom,
-
-                        age: age,
-
-                        genre: form.genre,
-
-                        taille_cm: parseInt(form.taille),
-
-                        poids_kg: parseInt(form.poids),
-
-                        objectif: form.objectif,
-
-                        date_naissance:
-                            form.dateNaissance
-                    }
-                ])
-                .select();
-
-            console.log("📥 Profil créé :", profileData);
-
-            if (profileError) {
-
-                console.log(
-                    "❌ Erreur création profil :",
-                    profileError
-                );
-
-                setError(
-                    "Erreur création profil"
-                );
-
-                setLoading(false);
-
-                return;
-            }
-
-            console.log("✅ Compte créé avec succès");
-
-            await AsyncStorage.setItem(
-                "user",
-                JSON.stringify(userData)
-            );
-
-            Alert.alert(
-                "Succès",
-                "Compte créé avec succès !"
-            );
-
+            Alert.alert("Succès", "Compte créé avec succès !");
             navigation.replace("Home");
 
         } catch (err) {
-
-            console.log("❌ Erreur générale :", err);
-
-            setError("Erreur serveur");
+            console.log("❌ ERREUR =", err);
+            setError("Erreur serveur / réseau");
 
         } finally {
-
-            console.log("🏁 Fin inscription");
-
+            console.log("🏁 FIN INSCRIPTION => loading false");
             setLoading(false);
         }
     };
@@ -681,7 +556,7 @@ export default function RegisterScreen({ navigation }) {
                                 ? "⏳ Création du compte..."
                                 : (
                                     step === totalSteps
-                                        ? "✅ Terminer"
+                                        ? " Terminer"
                                         : "Continuer"
                                 )
                         }

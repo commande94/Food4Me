@@ -1,5 +1,4 @@
 CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 -- Nettoyage
 DROP TABLE IF EXISTS composition_repas CASCADE;
@@ -12,10 +11,15 @@ DROP TABLE IF EXISTS utilisateur CASCADE;
 -- 1. UTILISATEUR ✅ UUID
 -- =====================================================
 CREATE TABLE public.utilisateur (
-    id_utilisateur UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
+
+    id_utilisateur UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
     email TEXT NOT NULL UNIQUE,
+
     mot_de_passe_hash TEXT NOT NULL,
+
     date_creation TIMESTAMPTZ DEFAULT now(),
+
     derniere_connexion TIMESTAMPTZ
 );
 
@@ -37,22 +41,29 @@ VALUES
 -- 2. PROFIL ✅ UUID
 -- =====================================================
 CREATE TABLE public.profil (
-    id_profil UUID DEFAULT public.uuid_generate_v4() PRIMARY KEY,
 
-    id_utilisateur UUID NOT NULL REFERENCES public.utilisateur(id_utilisateur) ON DELETE CASCADE,
+    id_profil UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    id_utilisateur UUID NOT NULL
+    REFERENCES public.utilisateur(id_utilisateur)
+    ON DELETE CASCADE,
 
     nom TEXT NOT NULL,
+
     prenom TEXT,
 
     age INT,
+
     genre TEXT,
 
     taille_cm INT,
+
     poids_kg INT,
 
     objectif TEXT NOT NULL,
 
     calories_cible_journaliere INT,
+
     preferences_alimentaires TEXT,
 
     date_naissance DATE,
@@ -60,7 +71,6 @@ CREATE TABLE public.profil (
     date_creation TIMESTAMPTZ DEFAULT now()
 );
 
--- Exemple insertion profil
 INSERT INTO public.profil (
     id_utilisateur,
     nom,
@@ -77,6 +87,7 @@ WHERE email = 'maxime@test.fr';
 -- 3. INGREDIENT ❌ SERIAL
 -- =====================================================
 CREATE TABLE public.ingredient (
+
     id_ingredient SERIAL PRIMARY KEY,
 
     nom TEXT NOT NULL UNIQUE,
@@ -84,8 +95,11 @@ CREATE TABLE public.ingredient (
     code_barre TEXT,
 
     calories_pour_100g NUMERIC NOT NULL,
+
     proteines_pour_100g NUMERIC NOT NULL,
+
     glucides_pour_100g NUMERIC NOT NULL,
+
     lipides_pour_100g NUMERIC NOT NULL,
 
     source TEXT DEFAULT 'OpenFoodFacts',
@@ -127,9 +141,12 @@ VALUES
 -- 4. REPAS ❌ SERIAL
 -- =====================================================
 CREATE TABLE public.repas (
+
     id_repas SERIAL PRIMARY KEY,
 
-    id_profil UUID NOT NULL REFERENCES public.profil(id_profil) ON DELETE CASCADE,
+    id_profil UUID NOT NULL
+    REFERENCES public.profil(id_profil)
+    ON DELETE CASCADE,
 
     nom_repas TEXT,
 
@@ -156,16 +173,20 @@ WHERE nom = 'Profil Maxime';
 -- 5. COMPOSITION REPAS ❌ SERIAL
 -- =====================================================
 CREATE TABLE public.composition_repas (
+
     id_composition SERIAL PRIMARY KEY,
 
-    id_repas INT NOT NULL REFERENCES public.repas(id_repas) ON DELETE CASCADE,
+    id_repas INT NOT NULL
+    REFERENCES public.repas(id_repas)
+    ON DELETE CASCADE,
 
-    id_ingredient INT NOT NULL REFERENCES public.ingredient(id_ingredient) ON DELETE CASCADE,
+    id_ingredient INT NOT NULL
+    REFERENCES public.ingredient(id_ingredient)
+    ON DELETE CASCADE,
 
     quantite_grammes NUMERIC NOT NULL
 );
 
--- Exemple composition repas
 INSERT INTO public.composition_repas (
     id_repas,
     id_ingredient,

@@ -6,13 +6,15 @@ import { getDailyTotals } from "../services/foodService";
 import { me as getProfile } from "../services/authService";
 import { globalStyles } from "../styles/globalStyles";
 import { homeStyles } from "../styles/homeStyles";
+import * as Progress from "react-native-progress";
+import { Animated } from "react-native";
 
 export default function HomeScreen({ navigation }) {
     const [token, setToken] = useState(null);
     const [dailyTotals, setDailyTotals] = useState(null);
     const [profile, setProfile] = useState(null);
     const [calorieTarget, setCalorieTarget] = useState(null);
-
+    const animatedValue = useState(new Animated.Value(0))[0];
     // Récupération du token au montage
     useEffect(() => {
         const loadToken = async () => {
@@ -65,6 +67,15 @@ export default function HomeScreen({ navigation }) {
     };
 
     const remainingCalories = dailyTotals && calorieTarget ? calorieTarget - dailyTotals.calories : null;
+    const progress =
+        dailyTotals && calorieTarget
+            ? dailyTotals.calories / calorieTarget
+            : 0;
+    const getProgressColor = () => {
+        if (progress < 0.7) return "#3b82f6"; // bleu
+        if (progress < 1) return "#f59e0b";   // orange
+        return "#ef4444";                      // rouge
+    };
 
     // Charger les totals quand l'écran est affiché
     useFocusEffect(
@@ -80,8 +91,22 @@ export default function HomeScreen({ navigation }) {
                     console.error("❌ Erreur synthèse jour:", e);
                 }
             })();
-        }, [token])
-    );
+        }, [token]),
+        useEffect(() => {
+            if (!calorieTarget) return;
+
+            const value = Math.min(
+                (dailyTotals?.calories || 0) / calorieTarget,
+                1
+            );
+
+            Animated.timing(animatedValue, {
+                toValue: value,
+                duration: 800,
+                useNativeDriver: false,
+            }).start();
+        }, [dailyTotals, calorieTarget]
+        ));
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem("token");
@@ -90,7 +115,14 @@ export default function HomeScreen({ navigation }) {
     };
 
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{ padding: 20 }}>
+        <ScrollView
+            style={{ flex: 1, backgroundColor: "#fafafa" }}
+            contentContainerStyle={{
+                padding: 20,
+                paddingTop: 30,
+                paddingBottom: 40
+            }}
+        >
             {/* HEADER */}
             <View style={homeStyles.header}>
                 <Text style={homeStyles.title}>Food4Me</Text>
@@ -100,44 +132,126 @@ export default function HomeScreen({ navigation }) {
             </View>
 
             {(dailyTotals || calorieTarget) && (
-                <View style={homeStyles.summaryCard}>
-                    <View style={homeStyles.summaryTop}>
-                        <View>
-                            <Text style={homeStyles.summaryLabel}>Calories consommées</Text>
-                            <Text style={homeStyles.summaryNumber}>{dailyTotals ? dailyTotals.calories : 0}</Text>
-                        </View>
-                        {calorieTarget && (
-                            <View style={homeStyles.summaryTargetBox}>
-                                <Text style={homeStyles.summaryTargetLabel}>Objectif calorique</Text>
-                                <Text style={homeStyles.summaryTargetNumber}>{calorieTarget} kcal</Text>
+                <View style={homeStyles.dashboardWrapper}>
+                    <View style={homeStyles.modernDashboard}>
+
+                        {/* HEADER MINI */}
+                        <View style={homeStyles.topBar}>
+                            <Text style={homeStyles.dateText}>
+                                📅 AUJOURD’HUI
+                            </Text>
+
+                            <View style={homeStyles.topIcons}>
+                                <Text>🔔</Text>
+                                <Text>👤</Text>
                             </View>
-                        )}
-                    </View>
-                    {remainingCalories !== null && (
-                        <Text style={homeStyles.summaryHint}>
-                            {remainingCalories >= 0
-                                ? `Il vous reste ${remainingCalories} kcal pour atteindre votre objectif`
-                                : `Objectif dépassé de ${Math.abs(remainingCalories)} kcal`}
+                        </View>
+
+                        {/* GAUGE CENTRAL */}
+                        <View style={homeStyles.gaugeSection}>
+
+                            {/* LEFT STATS */}
+                            <View style={homeStyles.sideStat}>
+                                <Text style={homeStyles.statLabel}>Consommé</Text>
+                                <Text style={homeStyles.statValue}>
+                                    {dailyTotals?.calories || 0}
+                                </Text>
+                            </View>
+
+                            {/* GAUGE */}
+                            <View
+                                style={[
+                                    homeStyles.gaugeCircle,
+                                    { borderColor: getProgressColor() }
+                                ]}
+                            >
+                                <Animated.View
+                                    pointerEvents="none"
+                                    style={{
+                                        position: "relative",
+                                        position: "absolute",
+                                        width: 160,
+                                        height: 160,
+                                        borderRadius: 80,
+                                        borderWidth: 12,
+                                        borderColor: getProgressColor(),
+                                        opacity: animatedValue,
+                                    }}
+                                />
+                                <View style={homeStyles.gaugeInner}>
+
+                                    <Text style={homeStyles.gaugeSmallText}>
+                                        Objectif
+                                    </Text>
+
+                                    <Text style={homeStyles.gaugeBigText}>
+                                        {calorieTarget || 0}
+                                    </Text>
+
+                                    <Text style={homeStyles.gaugeSubText}>
+                                        kcal
+                                    </Text>
+
+                                </View>
+                            </View>
+
+                            {/* RIGHT STATS */}
+                            <View style={homeStyles.sideStat}>
+                                <Text style={homeStyles.statLabel}>Restant</Text>
+                                <Text style={homeStyles.statValue}>
+                                    {remainingCalories ?? 0}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* OBJECTIF BADGE */}
+                        <View style={homeStyles.goalBadge}>
+                            <Text style={homeStyles.goalBadgeText}>
+                                🎯 {profile?.objectif || "Maintien"}
+                            </Text>
+                        </View>
+
+                        {/* CONSEIL */}
+                        <Text style={homeStyles.dashboardHintModern}>
+                            {profile?.objectif === "Perte de poids"
+                                ? "Déficit léger + protéines élevées pour optimiser la perte."
+                                : profile?.objectif === "Prise de masse"
+                                    ? "Augmente progressivement ton apport calorique."
+                                    : "Maintien stable : équilibre tes apports quotidiennement."
+                            }
                         </Text>
-                    )}
-                </View>
-            )}
 
-            {profile?.objectif && (
-                <View style={homeStyles.objectiveCard}>
-                    <Text style={homeStyles.objectiveTitle}>Votre objectif</Text>
-                    <Text style={homeStyles.objectiveText}>{profile.objectif}</Text>
-                    <Text style={homeStyles.objectiveHint}>
-                        {profile.objectif === "Perte de poids"
-                            ? "En douceur : réduisez légèrement les calories et privilégiez les protéines."
-                            : profile.objectif === "Prise de masse"
-                                ? "Ajoutez des repas riches et équilibrés pour soutenir la croissance musculaire."
-                                : "Conservez votre niveau actuel et surveillez votre apport quotidien."
-                        }
-                    </Text>
-                </View>
-            )}
+                        {/* BOTTOM CARDS */}
+                        <View style={homeStyles.bottomCards}>
 
+                            <View style={homeStyles.miniCard}>
+                                <Text style={homeStyles.miniTitle}>Protéines</Text>
+                                <Text style={homeStyles.miniValue}>
+                                    {dailyTotals?.proteines || 0} g
+                                </Text>
+                                <View style={homeStyles.bar} />
+                            </View>
+
+                            <View style={homeStyles.miniCard}>
+                                <Text style={homeStyles.miniTitle}>Glucides</Text>
+                                <Text style={homeStyles.miniValue}>
+                                    {dailyTotals?.glucides || 0} g
+                                </Text>
+                                <View style={homeStyles.bar} />
+                            </View>
+
+                            <View style={homeStyles.miniCard}>
+                                <Text style={homeStyles.miniTitle}>Lipides</Text>
+                                <Text style={homeStyles.miniValue}>
+                                    {dailyTotals?.lipides || 0} g
+                                </Text>
+                                <View style={homeStyles.bar} />
+                            </View>
+
+                        </View>
+
+                    </View></View>
+            )}
             <Text style={homeStyles.menuTitle}>Que souhaitez-vous faire ?</Text>
 
             {/* BOUTONS DU MENU */}

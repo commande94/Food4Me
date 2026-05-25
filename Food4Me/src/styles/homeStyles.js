@@ -43,7 +43,9 @@ export const homeStyles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 7,
+        marginTop: 10,
+        paddingTop: 30,
     },
     title: {
         fontSize: 28,
@@ -235,5 +237,208 @@ export const homeStyles = StyleSheet.create({
         justifyContent: "space-between",
         width: "100%",
         paddingHorizontal: 20,
+    },
+    dashboardCard: {
+        width: "100%",
+        backgroundColor: "#fff",
+        borderRadius: 28,
+        paddingVertical: 30,
+        paddingHorizontal: 24,
+        marginBottom: 20,
+        alignItems: "center",
+
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 6,
+        },
+        shadowOpacity: 0.08,
+        shadowRadius: 14,
+        elevation: 6,
+    },
+
+    calorieBigNumber: {
+        fontSize: 54,
+        fontWeight: "900",
+        color: "#ff7a00",
+        lineHeight: 58,
+    },
+
+    calorieSubText: {
+        fontSize: 16,
+        color: "#7f8c8d",
+        marginTop: 4,
+    },
+
+    goalBadge: {
+        backgroundColor: "#eef6ff",
+        paddingVertical: 10,
+        paddingHorizontal: 18,
+        borderRadius: 999,
+        marginBottom: 14,
+    },
+
+    goalBadgeText: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: "#0984e3",
+    },
+
+    remainingCalories: {
+        fontSize: 18,
+        fontWeight: "800",
+        color: "#2d3436",
+        marginBottom: 12,
+    },
+
+    dashboardHintModern: {
+        textAlign: "center",
+        color: "#636e72",
+        lineHeight: 22,
+        fontSize: 14,
+        paddingHorizontal: 10,
+    },
+
+    modernDashboard: {
+        backgroundColor: "transparent",
+        borderRadius: 30,
+        padding: 20,
+        marginTop: 20,
+    },
+
+    topBar: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+
+    dateText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#2ecc71",
+    },
+
+    topIcons: {
+        flexDirection: "row",
+        gap: 10,
+    },
+
+    gaugeSection: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+
+    sideStat: {
+        alignItems: "center",
+        width: 80,
+    },
+
+    statLabel: {
+        fontSize: 12,
+        color: "#666",
+    },
+
+    statValue: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#2c3e50",
+    },
+
+    gaugeCircle: {
+        width: 160,
+        height: 160,
+        borderRadius: 80,
+        borderWidth: 18,
+        borderColor: "#2ecc71",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(255,255,255,0.4)",
+    },
+
+    gaugeInner: {
+        alignItems: "center",
+    },
+
+    gaugeSmallText: {
+        fontSize: 12,
+        color: "#555",
+    },
+
+    gaugeBigText: {
+        fontSize: 28,
+        fontWeight: "900",
+        color: "#2c3e50",
+    },
+
+    gaugeSubText: {
+        fontSize: 12,
+        color: "#888",
+    },
+
+    goalBadge: {
+        marginTop: 15,
+        backgroundColor: "#2ecc71",
+        padding: 10,
+        borderRadius: 20,
+        alignSelf: "center",
+    },
+
+    goalBadgeText: {
+        color: "#fff",
+        fontWeight: "bold",
+    },
+
+    dashboardHintModern: {
+        marginTop: 10,
+        textAlign: "center",
+        color: "#555",
+        fontSize: 13,
+    },
+
+    bottomCards: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 20,
+    },
+
+    miniCard: {
+        flex: 1,
+        backgroundColor: "#fff",
+        marginHorizontal: 4,
+        borderRadius: 16,
+        padding: 10,
+        alignItems: "center",
+        elevation: 2,
+    },
+
+    miniTitle: {
+        fontSize: 12,
+        color: "#777",
+    },
+
+    miniValue: {
+        fontSize: 16,
+        fontWeight: "bold",
+        marginVertical: 6,
+    },
+
+    bar: {
+        width: "80%",
+        height: 4,
+        backgroundColor: "#2ecc71",
+        borderRadius: 10,
+    },
+    dashboardWrapper: {
+        backgroundColor: "#d4fee6",
+        borderRadius: 30,
+        padding: 10,
+        marginBottom: 20,
+        width: "100%",
+        alignSelf: "stretch",
+        marginHorizontal: 0, width: "100%",
+        alignSelf: "stretch",
+        marginHorizontal: 0,
     },
 });

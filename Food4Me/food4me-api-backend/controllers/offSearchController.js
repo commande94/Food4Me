@@ -4,7 +4,9 @@ const alimentsCiqual = require('../config/ciqual');
 class SearchCache {
     constructor(ttlSeconds = 600) {
         this.cache = new Map();
+        this.emptySearchCache = new Map();  // ✅ Mémoriser les recherches vides
         this.ttlSeconds = ttlSeconds;
+        this.emptyTtlSeconds = ttlSeconds * 2;  // Les résultats vides durent 2x plus longtemps
     }
 
     get(key) {
@@ -23,8 +25,28 @@ class SearchCache {
         this.cache.set(key, { data, timestamp: Date.now() });
     }
 
+    // ✅ Vérifier si on a déjà essayé cette recherche sur OFF avec 0 résultats
+    isEmptySearchCached(key) {
+        const item = this.emptySearchCache.get(key);
+        if (!item) return false;
+
+        const isExpired = Date.now() - item.timestamp > this.emptyTtlSeconds * 1000;
+        if (isExpired) {
+            this.emptySearchCache.delete(key);
+            return false;
+        }
+        return true;
+    }
+
+    // ✅ Marquer une recherche comme "vide" pour éviter de la refaire
+    markAsEmpty(key) {
+        this.emptySearchCache.set(key, { timestamp: Date.now() });
+        console.log(`💾 Mémorisation: "${key}" retourné 0 résultat ON OFF (${this.emptyTtlSeconds}s)`);
+    }
+
     clear() {
         this.cache.clear();
+        this.emptySearchCache.clear();
     }
 }
 
@@ -201,6 +223,58 @@ async function fetchFromOFF(terme, maxAttempts = 5) {
     }
 }
 
+// ✅ Recherche alternative par MARQUE si la recherche standard ne retourne rien
+async function fetchFromOFFByBrand(terme, maxAttempts = 3) {
+    const TIMEOUT_MS = 12000;
+    const RETRY_DELAY = 2000;
+    const fields = 'code,product_name,brands,image_front_url,nutriments,unique_scans_n';
+
+    const url = `https://world.openfoodfacts.org/cgi/search.pl`
+        + `?search_terms=${encodeURIComponent(terme)}`
+        + `&tagtype_0=brands`      // ✅ Recherche spécifiquement dans les marques
+        + `&tag_contains_0=contains`
+        + `&action=process&json=1`
+        + `&page_size=20`
+        + `&sort_by=unique_scans_n`
+        + `&fields=${fields}`;
+
+    console.log(`🏷️  OFF (recherche par MARQUE): "${terme}"`);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'User-Agent': 'Food4Me/1.0 (+https://github.com/food4me)',
+                    'Accept': 'application/json'
+                },
+                signal: controller.signal,
+            });
+            clearTimeout(timer);
+
+            if (!response.ok && response.status !== 429 && response.status !== 503) {
+                throw new Error(`OFF_HTTP_${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log(`✅ OFF (marque): ${data.products?.length || 0} produit(s) trouvé(s)`);
+            return data;
+
+        } catch (err) {
+            clearTimeout(timer);
+            if (attempt < maxAttempts) {
+                console.warn(`⚠️  OFF (marque) retry ${attempt + 1}/${maxAttempts}`);
+                await new Promise(r => setTimeout(r, RETRY_DELAY));
+                continue;
+            }
+            console.warn(`⚠️  OFF (marque) échoué: ${err.message}`);
+            throw err;
+        }
+    }
+}
+
 // ─── Contrôleur principal ──────────────────────────────────────────────────────
 exports.search = async (req, res) => {
     try {
@@ -211,7 +285,7 @@ exports.search = async (req, res) => {
 
         const searchKey = normalizeString(terme.trim());
 
-        // Vérifier le cache
+        // ✅ Vérifier le cache COMPLET (résultats ET recherches vides)
         const cached = searchCache.get(searchKey);
         if (cached) {
             console.log(`✅ Cache hit: "${terme}"`);
@@ -242,25 +316,60 @@ exports.search = async (req, res) => {
         let offResults = [];
         let offSuccess = false;
 
-        try {
-            const offData = await Promise.race([
-                requestQueue.add(() => fetchFromOFF(terme.trim())),
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('OFF_GLOBAL_TIMEOUT')), 20000) // 20s max global
-                )
-            ]);
+        // ✅ Vérifier si on a déjà essayé cette requête OFF et rien trouvé
+        const isEmptyCached = searchCache.isEmptySearchCached(searchKey);
 
-            offResults = (offData.products || [])
-                .filter(p => p.product_name && normalizeString(p.product_name).includes(termeNormalize))
-                .sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0))
-                .slice(0, 15);
-
-            offSuccess = true;
-            console.log(`✅ OFF réussi: ${offResults.length} produit(s)`);
-
-        } catch (offErr) {
-            console.warn(`⚠️  OFF non disponible. Erreur: ${offErr.message}`);
+        if (isEmptyCached) {
+            console.log(`⏭️  Recherche "${terme}" déjà testée en OFF → 0 résultats (cache). Skip.`);
             offSuccess = false;
+        } else {
+            try {
+                const offData = await Promise.race([
+                    requestQueue.add(() => fetchFromOFF(terme.trim())),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('OFF_GLOBAL_TIMEOUT')), 20000) // 20s max global
+                    )
+                ]);
+
+                offResults = (offData.products || [])
+                    .filter(p => p.product_name && normalizeString(p.product_name).includes(termeNormalize))
+                    .sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0))
+                    .slice(0, 15);
+
+                offSuccess = true;
+
+                // ✅ Si OFF retourne ZÉRO résultat, essayer la recherche par MARQUE
+                if (offResults.length === 0) {
+                    console.log(`⚠️  OFF retourne 0 résultat. Tentative de recherche par MARQUE...`);
+                    searchCache.markAsEmpty(searchKey);  // Mémoriser l'absence
+
+                    try {
+                        const offBrandData = await Promise.race([
+                            requestQueue.add(() => fetchFromOFFByBrand(terme.trim())),
+                            new Promise((_, reject) =>
+                                setTimeout(() => reject(new Error('OFF_BRAND_TIMEOUT')), 15000)
+                            )
+                        ]);
+
+                        offResults = (offBrandData.products || [])
+                            .filter(p => p.product_name)
+                            .sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0))
+                            .slice(0, 10);
+
+                        if (offResults.length > 0) {
+                            console.log(`🎉 Recherche par marque réussie: ${offResults.length} produit(s)`);
+                        }
+                    } catch (brandErr) {
+                        console.warn(`⚠️  Recherche par marque aussi infructueuse: ${brandErr.message}`);
+                    }
+                } else {
+                    console.log(`✅ OFF réussi: ${offResults.length} produit(s)`);
+                }
+
+            } catch (offErr) {
+                console.warn(`⚠️  OFF non disponible. Erreur: ${offErr.message}`);
+                offSuccess = false;
+            }
         }
 
         // ── 3. Fusion intelligente ──────────────────────────────────────────────
@@ -335,7 +444,7 @@ exports.search = async (req, res) => {
             resultsCount: finalProducts.length
         };
 
-        // Sauvegarder le résultat dans le cache
+        // ✅ Sauvegarder le résultat dans le cache
         searchCache.set(searchKey, response);
 
         res.set('Cache-Control', 'public, max-age=600');

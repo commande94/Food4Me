@@ -312,96 +312,95 @@ exports.search = async (req, res) => {
 
         console.log(`✅ Ciqual: ${ciqualResults.length} résultat(s)`);
 
-        // ── 2. Open Food Facts : en parallèle, avec timeout ──────────────────
+        // ── 2. Open Food Facts : SEULEMENT si Ciqual n'a rien trouvé ──────────
         let offResults = [];
         let offSuccess = false;
 
-        // ✅ Vérifier si on a déjà essayé cette requête OFF et rien trouvé
-        const isEmptyCached = searchCache.isEmptySearchCached(searchKey);
-
-        if (isEmptyCached) {
-            console.log(`⏭️  Recherche "${terme}" déjà testée en OFF → 0 résultats (cache). Skip.`);
+        // ✅ Si Ciqual a trouvé au moins 1 résultat → SKIP OFF complètement
+        if (ciqualResults.length > 0) {
+            console.log(`✅ Ciqual a trouvé des résultats. Open Food Facts non sollicité.`);
             offSuccess = false;
         } else {
-            try {
-                const offData = await Promise.race([
-                    requestQueue.add(() => fetchFromOFF(terme.trim())),
-                    new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('OFF_GLOBAL_TIMEOUT')), 20000) // 20s max global
-                    )
-                ]);
+            // Sinon, chercher sur OFF
+            // ✅ Vérifier si on a déjà essayé cette requête OFF et rien trouvé
+            const isEmptyCached = searchCache.isEmptySearchCached(searchKey);
 
-                offResults = (offData.products || [])
-                    .filter(p => p.product_name && normalizeString(p.product_name).includes(termeNormalize))
-                    .sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0))
-                    .slice(0, 15);
-
-                offSuccess = true;
-
-                // ✅ Si OFF retourne ZÉRO résultat, essayer la recherche par MARQUE
-                if (offResults.length === 0) {
-                    console.log(`⚠️  OFF retourne 0 résultat. Tentative de recherche par MARQUE...`);
-                    searchCache.markAsEmpty(searchKey);  // Mémoriser l'absence
-
-                    try {
-                        const offBrandData = await Promise.race([
-                            requestQueue.add(() => fetchFromOFFByBrand(terme.trim())),
-                            new Promise((_, reject) =>
-                                setTimeout(() => reject(new Error('OFF_BRAND_TIMEOUT')), 15000)
-                            )
-                        ]);
-
-                        offResults = (offBrandData.products || [])
-                            .filter(p => p.product_name)
-                            .sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0))
-                            .slice(0, 10);
-
-                        if (offResults.length > 0) {
-                            console.log(`🎉 Recherche par marque réussie: ${offResults.length} produit(s)`);
-                        }
-                    } catch (brandErr) {
-                        console.warn(`⚠️  Recherche par marque aussi infructueuse: ${brandErr.message}`);
-                    }
-                } else {
-                    console.log(`✅ OFF réussi: ${offResults.length} produit(s)`);
-                }
-
-            } catch (offErr) {
-                console.warn(`⚠️  OFF non disponible. Erreur: ${offErr.message}`);
+            if (isEmptyCached) {
+                console.log(`⏭️  Recherche "${terme}" déjà testée en OFF → 0 résultats (cache). Skip.`);
                 offSuccess = false;
+            } else {
+                try {
+                    const offData = await Promise.race([
+                        requestQueue.add(() => fetchFromOFF(terme.trim())),
+                        new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('OFF_GLOBAL_TIMEOUT')), 20000) // 20s max global
+                        )
+                    ]);
+
+                    offResults = (offData.products || [])
+                        .filter(p => p.product_name && normalizeString(p.product_name).includes(termeNormalize))
+                        .sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0))
+                        .slice(0, 15);
+
+                    offSuccess = true;
+
+                    // ✅ Si OFF retourne ZÉRO résultat, essayer la recherche par MARQUE
+                    if (offResults.length === 0) {
+                        console.log(`⚠️  OFF retourne 0 résultat. Tentative de recherche par MARQUE...`);
+                        searchCache.markAsEmpty(searchKey);  // Mémoriser l'absence
+
+                        try {
+                            const offBrandData = await Promise.race([
+                                requestQueue.add(() => fetchFromOFFByBrand(terme.trim())),
+                                new Promise((_, reject) =>
+                                    setTimeout(() => reject(new Error('OFF_BRAND_TIMEOUT')), 15000)
+                                )
+                            ]);
+
+                            offResults = (offBrandData.products || [])
+                                .filter(p => p.product_name)
+                                .sort((a, b) => (b.unique_scans_n || 0) - (a.unique_scans_n || 0))
+                                .slice(0, 10);
+
+                            if (offResults.length > 0) {
+                                console.log(`🎉 Recherche par marque réussie: ${offResults.length} produit(s)`);
+                            }
+                        } catch (brandErr) {
+                            console.warn(`⚠️  Recherche par marque aussi infructueuse: ${brandErr.message}`);
+                        }
+                    } else {
+                        console.log(`✅ OFF réussi: ${offResults.length} produit(s)`);
+                    }
+
+                } catch (offErr) {
+                    console.warn(`⚠️  OFF non disponible. Erreur: ${offErr.message}`);
+                    offSuccess = false;
+                }
             }
         }
 
-        // ── 3. Fusion intelligente ──────────────────────────────────────────────
-        // Stratégie pour 100% de fiabilité :
-        // 1. Si Ciqual + OFF → fusionner les deux (pas de doublons)
-        // 2. Si Ciqual uniquement → afficher Ciqual
-        // 3. Si OFF uniquement → afficher OFF
-        // 4. Si rien → recherche approximative
-        // ► Ne JAMAIS retourner une liste vide
+        // ── 3. Fusion intelligente (simplifiée) ────────────────────────────────
+        // Stratégie prioritaire :
+        // 1. Si Ciqual a trouvé → retourner Ciqual directement
+        // 2. Si Ciqual vide + OFF a trouvé → retourner OFF
+        // 3. Si rien trouvé → recherche approximative Ciqual
+        // 4. Encore rien → 5 premiers aliments par défaut
 
         let finalProducts = [];
         let source = "ciqual_only";
 
         if (ciqualResults.length > 0) {
+            // ✅ Ciqual a des résultats : c'est notre source prioritaire
             finalProducts = [...ciqualResults];
             source = "ciqual";
-
-            // Ajouter OFF en complément (éviter doublons)
-            if (offResults.length > 0) {
-                const ciqualCodes = new Set(ciqualResults.map(p => p.code));
-                const offUnique = offResults.filter(p => !ciqualCodes.has(p.code)).slice(0, 10);
-                finalProducts = [...ciqualResults, ...offUnique];
-                source = "ciqual_plus_off";
-                console.log(`🔀 Fusion: ${ciqualResults.length} Ciqual + ${offUnique.length} OFF`);
-            }
+            console.log(`✅ Résultats trouvés dans Ciqual, retour direct.`);
         } else if (offResults.length > 0) {
-            // Si Ciqual vide, utiliser OFF
+            // OFF a trouvé quelque chose (Ciqual était vide)
             finalProducts = offResults;
             source = "off_only";
-            console.log(`🔀 Fallback: OFF uniquement (${offResults.length} résultats)`);
+            console.log(`✅ Résultats trouvés dans OFF (Ciqual vide)`);
         } else {
-            // FALLBACK ULTIME : recherche approximative dans Ciqual
+            // FALLBACK : recherche approximative dans Ciqual
             console.warn(`⚠️  Aucun résultat exact. Recherche approximative...`);
             const words = termeNormalize.split(/\s+/).filter(w => w.length > 0);
 

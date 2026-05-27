@@ -230,7 +230,9 @@ export default function RegisterScreen({ navigation }) {
                 return;
             }
 
-            await AsyncStorage.setItem("user", JSON.stringify(data));
+            // 🔐 STOCKAGE TOKEN (IMPORTANT) - Même que AuthScreen.js
+            await AsyncStorage.setItem("token", data.token);
+            await AsyncStorage.setItem("userId", data.userId.toString());
 
             Alert.alert("Succès", "Compte créé avec succès !");
             navigation.replace("Home");

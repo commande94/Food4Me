@@ -110,10 +110,18 @@ exports.register = async (req, res) => {
 
     } catch (err) {
 
-        console.error("ERREUR REGISTER :", err);
+        console.error("❌ ERREUR REGISTER :", err.message);
+        console.error("Stack:", err.stack);
+
+        // ✅ GESTION DES ERREURS DB SPÉCIFIQUES
+        if (err.message.includes("timeout")) {
+            return res.status(503).json({
+                message: "Base de données indisponible (timeout)"
+            });
+        }
 
         res.status(500).json({
-            message: err.message
+            message: "Erreur serveur / réseau"
         });
     }
 };
@@ -125,11 +133,22 @@ exports.login = async (req, res) => {
 
         const { email, password } = req.body;
 
+        console.log(`🔐 LOGIN: ${email}`);
+
+        // ✅ TIMEOUT EXPLICITE POUR LA REQUÊTE
+        const loginTimeout = setTimeout(() => {
+            return res.status(503).json({
+                message: "Timeout de connexion à la base de données"
+            });
+        }, 5000);
+
         // Vérifie utilisateur
         const user = await pool.query(
             "SELECT * FROM utilisateur WHERE email = $1",
             [email]
         );
+
+        clearTimeout(loginTimeout);
 
         if (user.rows.length === 0) {
             return res.status(401).json({
@@ -168,6 +187,8 @@ exports.login = async (req, res) => {
             }
         );
 
+        console.log(`✅ LOGIN RÉUSSI: ${email}`);
+
         res.json({
             message: "Connexion réussie",
             token,
@@ -176,10 +197,18 @@ exports.login = async (req, res) => {
 
     } catch (err) {
 
-        console.error(err);
+        console.error("❌ ERREUR LOGIN:", err.message);
+        console.error("Stack:", err.stack);
+
+        // ✅ GESTION DES ERREURS DB SPÉCIFIQUES
+        if (err.message.includes("timeout") || err.code === "ECONNREFUSED") {
+            return res.status(503).json({
+                message: "Base de données indisponible"
+            });
+        }
 
         res.status(500).json({
-            message: "Erreur serveur"
+            message: "Erreur serveur / réseau"
         });
     }
 };

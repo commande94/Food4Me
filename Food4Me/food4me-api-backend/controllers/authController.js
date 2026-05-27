@@ -16,7 +16,8 @@ exports.register = async (req, res) => {
             genre,
             dateNaissance,
             poids,
-            taille
+            taille,
+            niveauActivite
         } = req.body;
 
         console.log("data received ", {
@@ -28,7 +29,8 @@ exports.register = async (req, res) => {
             genre,
             dateNaissance,
             poids,
-            taille
+            taille,
+            niveauActivite
         });
 
         // Vérifie si email existe déjà
@@ -76,9 +78,10 @@ exports.register = async (req, res) => {
                 date_naissance,
                 taille_cm,
                 poids_kg,
-                objectif
+                objectif,
+                niveau_activite
             )
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
             [
                 userId,
                 nom,
@@ -87,9 +90,13 @@ exports.register = async (req, res) => {
                 dateNaissance,
                 taille,
                 poids,
-                objectif
+                objectif,
+                niveauActivite
+
             ]
         );
+
+        console.log("📥 niveauActivite =", niveauActivite);
 
         // Génération token
         const token = jwt.sign(

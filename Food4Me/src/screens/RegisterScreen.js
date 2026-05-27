@@ -37,11 +37,12 @@ export default function RegisterScreen({ navigation }) {
         objectif: "",
         genre: "",
         dateNaissance: new Date(),
-        poids: 70,
-        taille: 170,
+        poids: "",
+        taille: "",
+        niveauActivite: "",
     });
 
-    const totalSteps = 8;
+    const totalSteps = 9;
 
     const updateField = (key, value) => {
 
@@ -92,6 +93,9 @@ export default function RegisterScreen({ navigation }) {
 
             case 8:
                 return "Quelle est votre taille ?";
+
+            case 9:
+                return "Quel est votre niveau d'activité ?";
 
             default:
                 return "";
@@ -189,6 +193,15 @@ export default function RegisterScreen({ navigation }) {
             return;
         }
 
+        if (step === 9 && !form.niveauActivite) {
+
+            setError(
+                "Veuillez choisir un niveau d'activité"
+            );
+
+            return;
+        }
+
         if (step < totalSteps) {
             console.log("➡️ Passage étape suivante");
             setStep(prev => prev + 1);
@@ -214,7 +227,8 @@ export default function RegisterScreen({ navigation }) {
                     genre: form.genre,
                     dateNaissance: form.dateNaissance.toISOString(),
                     poids: form.poids,
-                    taille: form.taille
+                    taille: form.taille,
+                    niveauActivite: form.niveauActivite
                 })
             });
 
@@ -482,6 +496,76 @@ export default function RegisterScreen({ navigation }) {
                                 />
                             ))}
                         </Picker>
+                    </View>
+                );
+
+            case 9:
+
+                return (
+
+                    <View style={styles.choiceContainer}>
+
+                        {[
+                            {
+                                title: "Sédentaire",
+                                description:
+                                    "Peu ou pas d'activité physique quotidienne."
+                            },
+
+                            {
+                                title: "Un peu actif",
+                                description:
+                                    "Quelques entraînements ou marche régulière."
+                            },
+
+                            {
+                                title: "Actif",
+                                description:
+                                    "Sport fréquent ou travail physique modéré."
+                            },
+
+                            {
+                                title: "Très actif",
+                                description:
+                                    "Sport intense ou activité physique quotidienne élevée."
+                            }
+
+                        ].map((item) => (
+
+                            <TouchableOpacity
+                                key={item.title}
+                                style={[
+                                    styles.choiceButton,
+                                    form.niveauActivite === item.title &&
+                                    styles.choiceSelected
+                                ]}
+                                onPress={() =>
+                                    updateField(
+                                        "niveauActivite",
+                                        item.title
+                                    )
+                                }
+                            >
+
+                                <Text style={styles.choiceText}>
+                                    {item.title}
+                                </Text>
+
+                                <Text
+                                    style={{
+                                        color: "#666",
+                                        fontSize: 13,
+                                        marginTop: 4,
+                                        textAlign: "center",
+                                        lineHeight: 18
+                                    }}
+                                >
+                                    {item.description}
+                                </Text>
+
+                            </TouchableOpacity>
+                        ))}
+
                     </View>
                 );
 

@@ -53,14 +53,58 @@ export default function HomeScreen({ navigation }) {
 
         const bmr = Math.round(10 * weight + 6.25 * height - 5 * age + (isMale ? 5 : -161));
 
-        const activityFactor = 1.3; // default moderate sedentary
-        const maintenance = Math.round(bmr * activityFactor);
+        // NIVEAU D'ACTIVITÉ
+        const niveau =
+            p.niveau_activite ||
+            p.niveauActivite ||
+            "";
 
-        const objectif = (p.objectif || "Maintien").toLowerCase();
+        let activityFactor = 1.2;
+
+        if (niveau === "Un peu actif") {
+
+            activityFactor = 1.375;
+        }
+
+        else if (niveau === "Actif") {
+
+            activityFactor = 1.55;
+        }
+
+        else if (niveau === "Très actif") {
+
+            activityFactor = 1.725;
+        }
+
+        // MAINTENANCE
+        const maintenance = Math.round(
+            bmr * activityFactor
+        );
+
+        // OBJECTIF
+        const objectif =
+            (
+                p.objectif ||
+                "Maintien"
+            ).toLowerCase();
+
         let target = maintenance;
-        if (objectif.includes("perte")) target = maintenance - 500;
-        else if (objectif.includes("prise")) target = maintenance + 500;
-
+        // PERTE = -30%
+        if (objectif.includes("perte")) {
+            target = Math.round(
+                maintenance * 0.70
+            );
+        }
+        // PRISE = +15%
+        else if (objectif.includes("prise")) {
+            target = Math.round(
+                maintenance * 1.15
+            );
+        }
+        // MAINTIEN
+        else {
+            target = maintenance;
+        }
         return target;
     };
 

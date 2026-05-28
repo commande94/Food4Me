@@ -8,6 +8,7 @@ import AuthScreen from "../screens/AuthScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import SearchScreen from "../screens/SearchScreen";
 import ComposeScreen from "../screens/ComposeScreen";
+import BottomTabs from "./BottomTabs";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,7 +19,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Welcome" component={WelcomeScreen} />
                 <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="Auth" component={AuthScreen} />
-                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="Home" component={BottomTabs} />
                 <Stack.Screen name="Search" component={SearchScreen} />
                 <Stack.Screen name="Compose" component={ComposeScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />

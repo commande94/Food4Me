@@ -1,6 +1,11 @@
 {
   "dependencies": {
+<<<<<<< HEAD
     "@supabase/supabase-js": "^2.106.1",
     "react-native-progress": "^5.0.1"
+=======
+    "@react-navigation/bottom-tabs": "^7.16.2",
+    "@supabase/supabase-js": "^2.106.1"
+>>>>>>> feature/bottom-navigation
   }
 }

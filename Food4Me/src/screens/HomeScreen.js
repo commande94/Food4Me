@@ -159,14 +159,10 @@ export default function HomeScreen({ navigation }) {
     };
 
     return (
-        <ScrollView
-            style={{ flex: 1, backgroundColor: "#fafafa" }}
-            contentContainerStyle={{
-                padding: 20,
-                paddingTop: 30,
-                paddingBottom: 40
-            }}
-        >
+        <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{
+            paddingTop: 20,
+            paddingBottom: 120
+        }}>
             {/* HEADER */}
             <View style={homeStyles.header}>
                 <Text style={homeStyles.title}>Food4Me</Text>

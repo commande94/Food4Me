@@ -1,0 +1,255 @@
+import React from "react";
+
+import {
+    View,
+    TouchableOpacity,
+    StyleSheet,
+    Text
+} from "react-native";
+
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import {
+    createBottomTabNavigator
+} from "@react-navigation/bottom-tabs";
+
+import {
+    Ionicons
+} from "@expo/vector-icons";
+
+import HomeScreen from "../screens/HomeScreen";
+
+const Tab = createBottomTabNavigator();
+
+function CustomTabBar({ state, navigation }) {
+
+    const insets = useSafeAreaInsets();
+
+    return (
+
+        <View style={styles.wrapper}>
+
+            <View style={[
+                styles.container,
+                { paddingBottom: insets.bottom + 6 }
+            ]}>
+
+                {state.routes.map((route, index) => {
+
+                    const isFocused =
+                        state.index === index;
+
+                    const onPress = () => {
+
+                        const event =
+                            navigation.emit({
+                                type: "tabPress",
+                                target: route.key,
+                            });
+
+                        if (
+                            !isFocused &&
+                            !event.defaultPrevented
+                        ) {
+                            navigation.navigate(route.name);
+                        }
+                    };
+
+                    let iconName;
+                    let label;
+
+                    if (route.name === "Home") {
+                        iconName = isFocused ? "book" : "book-outline";
+                        label = "Journal";
+                    }
+
+                    else if (route.name === "Dashboard") {
+                        iconName = isFocused ? "bar-chart" : "bar-chart-outline";
+                        label = "Progrès";
+                    }
+
+                    else if (route.name === "Add") {
+                        iconName = "add";
+                    }
+
+                    else if (route.name === "Meals") {
+                        iconName = isFocused ? "restaurant" : "restaurant-outline";
+                        label = "Régimes";
+                    }
+
+                    else if (route.name === "Profile") {
+                        iconName = isFocused ? "log-out" : "log-out-outline";
+                        label = "Déconnexion";
+                    }
+
+                    // BOUTON CENTRAL +
+                    if (route.name === "Add") {
+
+                        return (
+
+                            <TouchableOpacity
+                                key={route.key}
+                                onPress={onPress}
+                                style={styles.tabButton}
+                                activeOpacity={0.9}
+                            >
+
+                                <View style={styles.addBox}>
+                                    <Ionicons
+                                        name={iconName}
+                                        size={25}
+                                        color="#020202"
+                                    />
+                                </View>
+
+
+                            </TouchableOpacity>
+                        );
+                    }
+
+                    return (
+
+                        <TouchableOpacity
+                            key={route.key}
+                            onPress={onPress}
+                            style={styles.tabButton}
+                            activeOpacity={0.7}
+                        >
+
+                            <View style={[
+                                styles.iconBox,
+                                isFocused && styles.activeIconBox
+                            ]}>
+
+                                <Ionicons
+                                    name={iconName}
+                                    size={20}
+                                    color="#000"
+                                />
+
+                                <Text style={[
+                                    styles.label,
+                                    isFocused && styles.labelActive
+                                ]}>
+                                    {label}
+                                </Text>
+
+                            </View>
+
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        </View>
+    );
+}
+
+export default function BottomTabs() {
+
+    return (
+
+        <Tab.Navigator
+            tabBar={(props) => (
+                <CustomTabBar {...props} />
+            )}
+            screenOptions={{
+                headerShown: false
+            }}
+        >
+
+            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Dashboard" component={HomeScreen} />
+            <Tab.Screen name="Add" component={HomeScreen} />
+            <Tab.Screen name="Meals" component={HomeScreen} />
+            <Tab.Screen name="Profile" component={HomeScreen} />
+
+        </Tab.Navigator>
+    );
+}
+
+const styles = StyleSheet.create({
+
+    wrapper: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
+
+    container: {
+        flexDirection: "row",
+        backgroundColor: "#fff",
+        borderTopWidth: 0.5,
+        borderTopColor: "#000",
+        height: 85,
+        shadowOpacity: 0.12,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 10,
+        paddingTop: 10,
+        paddingBottom: 10,
+        overflow: "hidden",
+        shadowOpacity: 0.08,
+        shadowRadius: 15,
+        shadowOffset: {
+            width: 0,
+            height: 5
+        },
+
+        elevation: 8,
+    },
+
+    tabButton: {
+        flex: 1,
+        alignItems: "center",
+        paddingVertical: 6,
+        justifyContent: "center",
+
+    },
+
+    iconBox: {
+        width: 85,
+        height: 70,
+        borderRadius: 8,
+
+        justifyContent: "center",
+        alignItems: "center",
+        paddingBottom: 6,
+
+        paddingVertical: 4,
+        overflow: "hidden",
+        paddingTop: 35,
+    },
+
+    addBox: {
+        width: 40,
+        height: 40,
+        borderRadius: 10,
+
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 25,
+        backgroundColor: "#4ADE80"
+
+    },
+
+    activeIconBox: {
+        backgroundColor: "#e5e5e5",
+
+    },
+
+    label: {
+        fontSize: 10,
+        marginTop: 2,   // 👈 proche de l’icône
+        color: "#000",
+        maxWidth: 70,      // ✅ empêche débordement horizontal
+        textAlign: "center",
+        marginTop: 1,
+    },
+
+    labelActive: {
+        fontWeight: "600",
+    },
+
+
+});

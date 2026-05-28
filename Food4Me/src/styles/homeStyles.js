@@ -1,19 +1,21 @@
 import { StyleSheet } from "react-native";
 
 export const homeStyles = StyleSheet.create({
-    // EXISTANTS (card, image, name, calories) – conservés
+
+    // CARD PRODUIT
     card: {
         marginTop: 25,
-        padding: 20,
         backgroundColor: "#fff",
         borderRadius: 18,
         alignItems: "center",
         width: "100%",
+
         shadowColor: "#000",
         shadowOpacity: 0.08,
         shadowRadius: 10,
         elevation: 4,
     },
+
     image: {
         width: 120,
         height: 120,
@@ -21,12 +23,14 @@ export const homeStyles = StyleSheet.create({
         marginBottom: 15,
         backgroundColor: "#f2f2f2",
     },
+
     name: {
         fontSize: 18,
         fontWeight: "700",
         textAlign: "center",
         marginBottom: 10,
     },
+
     calories: {
         fontSize: 15,
         color: "#444",
@@ -37,7 +41,8 @@ export const homeStyles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 15,
     },
-    // AJOUTS pour le menu
+
+    // HEADER
     header: {
         width: "100%",
         flexDirection: "row",
@@ -47,22 +52,27 @@ export const homeStyles = StyleSheet.create({
         marginTop: 10,
         paddingTop: 30,
     },
+
     title: {
         fontSize: 28,
         fontWeight: "bold",
         color: "#2ecc71",
     },
+
     logoutButton: {
         paddingVertical: 10,
         paddingHorizontal: 15,
         backgroundColor: "#e74c3c",
         borderRadius: 8,
     },
+
     logoutButtonText: {
         color: "#fff",
         fontWeight: "bold",
         fontSize: 14,
     },
+
+    // MENU
     menuTitle: {
         fontSize: 22,
         fontWeight: "600",
@@ -70,40 +80,50 @@ export const homeStyles = StyleSheet.create({
         marginBottom: 22,
         marginTop: 16,
     },
+
     menuButton: {
         width: "100%",
-        maxWidth: 560,
-        alignSelf: "center",
+
         paddingVertical: 16,
-        paddingHorizontal: 14,
+
         borderRadius: 12,
         marginBottom: 12,
+
         alignItems: "center",
     },
+
     menuButtonText: {
         color: "#fff",
         fontSize: 17,
         fontWeight: "bold",
         marginBottom: 4,
     },
+
     menuButtonSub: {
         color: "rgba(255,255,255,0.9)",
         fontSize: 12,
     },
+
+    // DAILY CARD
     dailyCard: {
         width: "100%",
-        maxWidth: 560,
-        alignSelf: "center",
+
         backgroundColor: "#fff",
         borderRadius: 12,
         padding: 16,
         marginTop: 16,
+
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
     },
+
     dailyTitle: {
         fontSize: 18,
         fontWeight: "bold",
@@ -111,11 +131,13 @@ export const homeStyles = StyleSheet.create({
         marginBottom: 10,
         textAlign: "center",
     },
+
     dailyRow: {
         flexDirection: "row",
         flexWrap: "wrap",
         justifyContent: "space-around",
     },
+
     dailyMacro: {
         fontSize: 13,
         color: "#555",
@@ -123,20 +145,27 @@ export const homeStyles = StyleSheet.create({
         width: "45%",
         textAlign: "center",
     },
+
+    // SUMMARY
     summaryCard: {
         width: "100%",
-        maxWidth: 560,
-        alignSelf: "center",
+
         backgroundColor: "#fff",
         borderRadius: 16,
         padding: 16,
         marginBottom: 16,
+
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {
+            width: 0,
+            height: 4
+        },
+
         shadowOpacity: 0.08,
         shadowRadius: 12,
         elevation: 5,
     },
+
     summaryTop: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -144,16 +173,19 @@ export const homeStyles = StyleSheet.create({
         marginBottom: 12,
         flexWrap: "wrap",
     },
+
     summaryLabel: {
         fontSize: 16,
         color: "#7f8c8d",
         marginBottom: 6,
     },
+
     summaryNumber: {
         fontSize: 42,
         fontWeight: "900",
         color: "#e67e22",
     },
+
     summaryTargetBox: {
         backgroundColor: "#f1c40f",
         borderRadius: 14,
@@ -163,6 +195,7 @@ export const homeStyles = StyleSheet.create({
         justifyContent: "center",
         minWidth: 120,
     },
+
     summaryTargetLabel: {
         fontSize: 12,
         color: "#34495e",
@@ -170,44 +203,53 @@ export const homeStyles = StyleSheet.create({
         letterSpacing: 0.5,
         marginBottom: 4,
     },
+
     summaryTargetNumber: {
         fontSize: 18,
         fontWeight: "700",
         color: "#34495e",
     },
+
     summaryHint: {
         color: "#2c3e50",
         fontSize: 14,
         textAlign: "center",
     },
+
+    // OBJECTIF
     objectiveCard: {
         width: "100%",
-        maxWidth: 560,
-        alignSelf: "center",
+
         backgroundColor: "#ecf0f1",
         borderRadius: 16,
         padding: 16,
         marginBottom: 16,
+
         borderWidth: 1,
         borderColor: "#dfe6e9",
     },
+
     objectiveTitle: {
         fontSize: 16,
         fontWeight: "700",
         color: "#2c3e50",
         marginBottom: 8,
     },
+
     objectiveText: {
         fontSize: 18,
         fontWeight: "700",
         color: "#0984e3",
         marginBottom: 10,
     },
+
     objectiveHint: {
         fontSize: 14,
         color: "#636e72",
         lineHeight: 20,
     },
+
+    // BIG CALORIES
     bigCaloriesCard: {
         width: "100%",
         backgroundColor: "#fff",
@@ -215,28 +257,35 @@ export const homeStyles = StyleSheet.create({
         padding: 18,
         marginTop: 10,
         alignItems: "center",
+
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+
         shadowOpacity: 0.08,
         shadowRadius: 6,
         elevation: 4,
     },
+
     bigCaloriesNumber: {
         fontSize: 44,
         fontWeight: "900",
         color: "#e67e22",
     },
+
     bigCaloriesLabel: {
         fontSize: 14,
         color: "#777",
         marginTop: 6,
         marginBottom: 8,
     },
+
     dailyRowSmall: {
         flexDirection: "row",
         justifyContent: "space-between",
         width: "100%",
-        paddingHorizontal: 20,
     },
     dashboardCard: {
         width: "100%",

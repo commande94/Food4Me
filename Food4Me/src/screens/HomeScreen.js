@@ -159,139 +159,116 @@ export default function HomeScreen({ navigation }) {
     };
 
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{
+        <ScrollView style={{ flex: 1, backgroundColor: "#eefaf1" }} contentContainerStyle={{
             paddingTop: 20,
             paddingBottom: 120
         }}>
             {/* HEADER */}
             <View style={homeStyles.header}>
-                <Text style={homeStyles.title}>Food4Me</Text>
-                <TouchableOpacity style={homeStyles.logoutButton} onPress={handleLogout}>
-                    <Text style={homeStyles.logoutButtonText}>Déconnexion</Text>
+
+                <View style={homeStyles.logoContainer}>
+
+                    <Text style={homeStyles.logoText}>
+                        Food4Me
+                    </Text>
+
+                </View>
+
+                <TouchableOpacity
+                    style={homeStyles.logoutButton}
+                    onPress={handleLogout}
+                >
+                    <Text style={homeStyles.logoutButtonText}>
+                        Déconnexion
+                    </Text>
                 </TouchableOpacity>
+
             </View>
 
-            {(dailyTotals || calorieTarget) && (
-                <View style={homeStyles.dashboardWrapper}>
-                    <View style={homeStyles.modernDashboard}>
+            {/* DASHBOARD HORIZONTAL */}
+            <View style={homeStyles.horizontalDashboard}>
 
-                        {/* HEADER MINI */}
-                        <View style={homeStyles.topBar}>
-                            <Text style={homeStyles.dateText}>
-                                📅 AUJOURD’HUI
-                            </Text>
+                {/* TOP VALUES */}
+                <View style={homeStyles.horizontalTopRow}>
 
-                            <View style={homeStyles.topIcons}>
-                                <Text>🔔</Text>
-                                <Text>👤</Text>
-                            </View>
-                        </View>
-
-                        {/* GAUGE CENTRAL */}
-                        <View style={homeStyles.gaugeSection}>
-
-                            {/* LEFT STATS */}
-                            <View style={homeStyles.sideStat}>
-                                <Text style={homeStyles.statLabel}>Consommé</Text>
-                                <Text style={homeStyles.statValue}>
-                                    {dailyTotals?.calories || 0}
-                                </Text>
-                            </View>
-
-                            {/* GAUGE */}
-                            <View
-                                style={[
-                                    homeStyles.gaugeCircle,
-                                    { borderColor: getProgressColor() }
-                                ]}
-                            >
-                                <Animated.View
-                                    pointerEvents="none"
-                                    style={{
-                                        position: "relative",
-                                        position: "absolute",
-                                        width: 160,
-                                        height: 160,
-                                        borderRadius: 80,
-                                        borderWidth: 12,
-                                        borderColor: getProgressColor(),
-                                        opacity: animatedValue,
-                                    }}
-                                />
-                                <View style={homeStyles.gaugeInner}>
-
-                                    <Text style={homeStyles.gaugeSmallText}>
-                                        Objectif
-                                    </Text>
-
-                                    <Text style={homeStyles.gaugeBigText}>
-                                        {calorieTarget || 0}
-                                    </Text>
-
-                                    <Text style={homeStyles.gaugeSubText}>
-                                        kcal
-                                    </Text>
-
-                                </View>
-                            </View>
-
-                            {/* RIGHT STATS */}
-                            <View style={homeStyles.sideStat}>
-                                <Text style={homeStyles.statLabel}>Restant</Text>
-                                <Text style={homeStyles.statValue}>
-                                    {remainingCalories ?? 0}
-                                </Text>
-                            </View>
-                        </View>
-
-                        {/* OBJECTIF BADGE */}
-                        <View style={homeStyles.goalBadge}>
-                            <Text style={homeStyles.goalBadgeText}>
-                                🎯 {profile?.objectif || "Maintien"}
-                            </Text>
-                        </View>
-
-                        {/* CONSEIL */}
-                        <Text style={homeStyles.dashboardHintModern}>
-                            {profile?.objectif === "Perte de poids"
-                                ? "Déficit léger + protéines élevées pour optimiser la perte."
-                                : profile?.objectif === "Prise de masse"
-                                    ? "Augmente progressivement ton apport calorique."
-                                    : "Maintien stable : équilibre tes apports quotidiennement."
-                            }
+                    <View style={homeStyles.horizontalStatBox}>
+                        <Text style={homeStyles.horizontalStatLabel}>
+                            Consommé
                         </Text>
 
-                        {/* BOTTOM CARDS */}
-                        <View style={homeStyles.bottomCards}>
+                        <Text style={homeStyles.horizontalStatValue}>
+                            {dailyTotals?.calories || 0}
+                        </Text>
+                    </View>
 
-                            <View style={homeStyles.miniCard}>
-                                <Text style={homeStyles.miniTitle}>Protéines</Text>
-                                <Text style={homeStyles.miniValue}>
-                                    {dailyTotals?.proteines || 0} g
-                                </Text>
-                                <View style={homeStyles.bar} />
-                            </View>
+                    <View style={homeStyles.horizontalCenterInfos}>
 
-                            <View style={homeStyles.miniCard}>
-                                <Text style={homeStyles.miniTitle}>Glucides</Text>
-                                <Text style={homeStyles.miniValue}>
-                                    {dailyTotals?.glucides || 0} g
-                                </Text>
-                                <View style={homeStyles.bar} />
-                            </View>
+                        <Text style={homeStyles.horizontalCenterSmall}>
+                            Objectif journalier
+                        </Text>
 
-                            <View style={homeStyles.miniCard}>
-                                <Text style={homeStyles.miniTitle}>Lipides</Text>
-                                <Text style={homeStyles.miniValue}>
-                                    {dailyTotals?.lipides || 0} g
-                                </Text>
-                                <View style={homeStyles.bar} />
-                            </View>
+                        <Text style={homeStyles.horizontalCenterBig}>
+                            {calorieTarget || 0}
+                        </Text>
 
-                        </View>
+                        <Text style={homeStyles.horizontalCenterSub}>
+                            kcal
+                        </Text>
 
-                    </View></View>
-            )}
+                    </View>
+
+                    <View style={homeStyles.horizontalStatBox}>
+                        <Text style={homeStyles.horizontalStatLabel}>
+                            Restant
+                        </Text>
+
+                        <Text style={homeStyles.horizontalStatValue}>
+                            {remainingCalories ?? 0}
+                        </Text>
+                    </View>
+
+                </View>
+
+                {/* BARRE PRINCIPALE */}
+                <View style={homeStyles.mainBarBackground}>
+
+                    <Animated.View
+                        style={[
+                            homeStyles.mainBarFill,
+                            {
+                                width: `${calorieTarget
+                                    ? Math.min(
+                                        (
+                                            (dailyTotals?.calories || 0) /
+                                            calorieTarget
+                                        ) * 100,
+                                        100
+                                    )
+                                    : 0
+                                    }%`,
+                                backgroundColor: getProgressColor(),
+                                opacity: animatedValue,
+                            }
+                        ]}
+                    />
+
+                </View>
+
+                {/* POURCENTAGE */}
+                <Text style={homeStyles.progressPercent}>
+                    {
+                        calorieTarget
+                            ? Math.round(
+                                (
+                                    (dailyTotals?.calories || 0) /
+                                    calorieTarget
+                                ) * 100
+                            )
+                            : 0
+                    }%
+                </Text>
+
+            </View>
             <Text style={homeStyles.menuTitle}>Que souhaitez-vous faire ?</Text>
 
             {/* BOUTONS DU MENU */}

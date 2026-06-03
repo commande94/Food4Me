@@ -71,9 +71,9 @@ export default function AuthScreen({ navigation }) {
 
         } catch (err) {
 
-            console.log("LOGIN ERROR:", err);
+            console.log("LOGIN ERROR:", err, "URL:", `${API_URL}/auth/login`);
 
-            setError("Erreur serveur ou réseau");
+            setError(`Impossible de joindre le serveur (${API_URL}). Vérifie que le backend tourne et que ton téléphone est sur le même réseau Wi-Fi.`);
         } finally {
             setLoading(false);
         }

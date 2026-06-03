@@ -29,6 +29,8 @@ export const searchIngredients = async (nom, signal) => {
             return {
                 id_ingredient: p.code || Math.random().toString(),
                 nom: p.product_name || "Produit inconnu",
+                brands: p.brands || null,
+                image_front_url: p.image_front_url || null,
                 calories_pour_100g: parseFloat(nut["energy-kcal_100g"]) || 0,
                 proteines_pour_100g: parseFloat(nut.proteins_100g) || 0,
                 glucides_pour_100g: parseFloat(nut.carbohydrates_100g) || 0,

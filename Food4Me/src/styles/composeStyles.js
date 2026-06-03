@@ -37,14 +37,45 @@ export const composeStyles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 10,
     },
+    foundImg: {
+        width: 80,
+        height: 80,
+        borderRadius: 8,
+        alignSelf: "center",
+        marginBottom: 8,
+    },
+    brandText: {
+        fontSize: 14,
+        color: "#666",
+        textAlign: "center",
+        marginBottom: 10,
+    },
     suggestionsContainer: {
-        maxHeight: 150,
+        maxHeight: 220,
         width: "100%",
         backgroundColor: "#fff",
         borderRadius: 8,
         marginBottom: 10,
         borderWidth: 1,
         borderColor: "#ddd",
+    },
+    suggestionRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    suggestionImg: {
+        width: 44,
+        height: 44,
+        borderRadius: 6,
+        marginRight: 10,
+    },
+    suggestionTextWrap: {
+        flex: 1,
+    },
+    suggestionBrand: {
+        fontSize: 12,
+        color: "#888",
+        marginTop: 1,
     },
     suggestionItem: {
         paddingVertical: 12,

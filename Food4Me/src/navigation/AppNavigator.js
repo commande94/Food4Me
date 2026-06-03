@@ -6,7 +6,6 @@ import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import AuthScreen from "../screens/AuthScreen";
 import ProfileScreen from "../screens/ProfileScreen";
-import SearchScreen from "../screens/SearchScreen";
 import ComposeScreen from "../screens/ComposeScreen";
 import BottomTabs from "./BottomTabs";
 
@@ -20,8 +19,8 @@ export default function AppNavigator() {
                 <Stack.Screen name="Register" component={RegisterScreen} />
                 <Stack.Screen name="Auth" component={AuthScreen} />
                 <Stack.Screen name="Home" component={BottomTabs} />
-                <Stack.Screen name="Search" component={SearchScreen} />
                 <Stack.Screen name="Compose" component={ComposeScreen} />
+                <Stack.Screen name="Search" component={ComposeScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
             </Stack.Navigator>
         </NavigationContainer>

@@ -294,21 +294,12 @@ export default function HomeScreen({ navigation }) {
             )}
             <Text style={homeStyles.menuTitle}>Que souhaitez-vous faire ?</Text>
 
-            {/* BOUTONS DU MENU */}
-            <TouchableOpacity
-                style={[homeStyles.menuButton, { backgroundColor: "#3498db" }]}
-                onPress={() => navigation.navigate("Search", { token })}
-            >
-                <Text style={homeStyles.menuButtonText}>🔍 Ajouter un repas préparé</Text>
-                <Text style={homeStyles.menuButtonSub}>Rechercher un produit via OpenFoodFacts</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
                 style={[homeStyles.menuButton, { backgroundColor: "#2ecc71" }]}
                 onPress={() => navigation.navigate("Compose", { token })}
             >
-                <Text style={homeStyles.menuButtonText}>🥗 Composer votre repas</Text>
-                <Text style={homeStyles.menuButtonSub}>Ajouter vos propres ingrédients</Text>
+                <Text style={homeStyles.menuButtonText}>➕ Ajouter un repas</Text>
+                <Text style={homeStyles.menuButtonSub}>Rechercher un aliment et composer votre repas</Text>
             </TouchableOpacity>
 
             {/* SYNTHÈSE DU JOUR */}

@@ -24505,5 +24505,68 @@
         "proteines": 6.6,
         "glucides": 59,
         "lipides": 22
+    },
+    {
+        "nom": "Panzani sauce pesto basilic 200g (Panzani)",
+        "calories": 329,
+        "proteines": 3.8,
+        "glucides": 7.9,
+        "lipides": 31
+    },
+    {
+        "nom": "Panzani sce provencale 425g (Panzani)",
+        "calories": 56,
+        "proteines": 1.5,
+        "glucides": 7.8,
+        "lipides": 1.8
+    },
+    {
+        "nom": "Panzani sauce provencale nat 210g f12 (Panzani)",
+        "calories": 55,
+        "proteines": 1.5,
+        "glucides": 7.7,
+        "lipides": 1.7
+    },
+    {
+        "nom": "Panzani sauce pesto tomates sechees 200g (PANZANI, Panzani)",
+        "calories": 276,
+        "proteines": 4.5,
+        "glucides": 12,
+        "lipides": 23
+    },
+    {
+        "nom": "Panzani - bc - tomacouli nature 500g (big) (PANZANI)",
+        "calories": 27,
+        "proteines": 1.2,
+        "glucides": 4.5,
+        "lipides": 0.1
+    },
+    {
+        "nom": "Panzani - spf - sauce bolognaise pur boeuf 400g (Panzani)",
+        "calories": 84,
+        "proteines": 4.8,
+        "glucides": 6.5,
+        "lipides": 4
+    },
+    {
+        "nom": "Danon Hop (Danone, Danon)",
+        "calories": 87,
+        "proteines": 1.8,
+        "glucides": 16.7,
+        "lipides": 1.6
+    },
+    {
+        "nom": "danon",
+        "calories": 0,
+        "proteines": 0,
+        "glucides": 0,
+        "lipides": 0
+    },
+    {
+        "nom": "danon light fit (Dannon)",
+        "calories": 0,
+        "proteines": 0,
+        "glucides": 0,
+        "lipides": 0
     }
 ]

@@ -24386,5 +24386,124 @@
         "proteines": 4.1,
         "glucides": 14,
         "lipides": 2.8
+    },
+    {
+        "nom": "Nutella (Nutella, Yum yum)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Nutella (nutella)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Nutella (Ferrero, Nutella)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Nutella Plant-Based (Ferrero, nutella)",
+        "calories": 534,
+        "proteines": 6.8,
+        "glucides": 53.4,
+        "lipides": 31.8
+    },
+    {
+        "nom": "Biscuits NUTELLA Biscuits Noisettes et Cacao x22 - 304g (Nutella biscuits, nutella)",
+        "calories": 515,
+        "proteines": 7.9,
+        "glucides": 64,
+        "lipides": 24.8
+    },
+    {
+        "nom": "nutella (Ferrero, Nutella, Nutellagg)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Nutella 600g (Ferrero, Nutella)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.2,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Pâte à tartiner Nutella noisettes et cacao - 750g (Ferrero, Nutella)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Nutella pâte à tartiner aux noisettes et au cacao (Ferrero, Nutella)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Nutella Nuss-Nugat-Creme (Ferrero, Nutella)",
+        "calories": 538,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Nutella 400g (Ferrero, Nutella)",
+        "calories": 539,
+        "proteines": 6.3,
+        "glucides": 57.5,
+        "lipides": 30.9
+    },
+    {
+        "nom": "Biscuits NUTELLA B-ready Noisettes et Cacao x6 - 132g (Nutella b-ready, nutella)",
+        "calories": 521,
+        "proteines": 7.2,
+        "glucides": 60.7,
+        "lipides": 27
+    },
+    {
+        "nom": "crêpes de Landerneau (Le STER)",
+        "calories": 407,
+        "proteines": 8.2,
+        "glucides": 57,
+        "lipides": 16
+    },
+    {
+        "nom": "Crêpes dentelle - L'authentique (Gavottes)",
+        "calories": 428,
+        "proteines": 5.5,
+        "glucides": 78,
+        "lipides": 10
+    },
+    {
+        "nom": "Whaou - 8 Crêpes Chocolat (Whaou!)",
+        "calories": 466,
+        "proteines": 6.6,
+        "glucides": 59,
+        "lipides": 22
+    },
+    {
+        "nom": "Crêpes bretonnes (St Michel)",
+        "calories": 424,
+        "proteines": 7,
+        "glucides": 57,
+        "lipides": 19
+    },
+    {
+        "nom": "Crêpes Chocolat x 15 (Whaou !)",
+        "calories": 465,
+        "proteines": 6.6,
+        "glucides": 59,
+        "lipides": 22
     }
 ]

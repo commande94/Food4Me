@@ -1,4 +1,5 @@
 const alimentsCiqual = require('../config/ciqual');
+const alimentsStore = require('../utils/alimentsStore');
 
 // ─── Cache simple en mémoire ───────────────────────────────────────────────────
 class SearchCache {
@@ -364,12 +365,14 @@ exports.search = async (req, res) => {
 
                             if (offResults.length > 0) {
                                 console.log(`🎉 Recherche par marque réussie: ${offResults.length} produit(s)`);
+                                alimentsStore.addFromOffProducts(offResults);
                             }
                         } catch (brandErr) {
                             console.warn(`⚠️  Recherche par marque aussi infructueuse: ${brandErr.message}`);
                         }
                     } else {
                         console.log(`✅ OFF réussi: ${offResults.length} produit(s)`);
+                        alimentsStore.addFromOffProducts(offResults);
                     }
 
                 } catch (offErr) {

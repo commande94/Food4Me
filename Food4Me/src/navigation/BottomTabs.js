@@ -7,6 +7,7 @@ import {
     Text
 } from "react-native";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -25,6 +26,12 @@ function CustomTabBar({ state, navigation }) {
 
     const insets = useSafeAreaInsets();
 
+    const handleLogout = async () => {
+        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("userId");
+        navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
+    };
+
     return (
 
         <View style={styles.wrapper}>
@@ -40,6 +47,11 @@ function CustomTabBar({ state, navigation }) {
                         state.index === index;
 
                     const onPress = () => {
+
+                        if (route.name === "Profile") {
+                            handleLogout();
+                            return;
+                        }
 
                         const event =
                             navigation.emit({

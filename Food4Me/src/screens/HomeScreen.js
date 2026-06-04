@@ -205,12 +205,6 @@ export default function HomeScreen({ navigation }) {
         }).start();
     }, [dailyTotals, calorieTarget, animatedValue]);
 
-    const handleLogout = async () => {
-        await AsyncStorage.removeItem("token");
-        await AsyncStorage.removeItem("userId");
-        navigation.reset({ index: 0, routes: [{ name: "Welcome" }] });
-    };
-
     return (
         <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{
             paddingTop: 20,
@@ -219,9 +213,6 @@ export default function HomeScreen({ navigation }) {
             {/* HEADER */}
             <View style={homeStyles.header}>
                 <Text style={homeStyles.title}>Food4Me</Text>
-                <TouchableOpacity style={homeStyles.logoutButton} onPress={handleLogout}>
-                    <Text style={homeStyles.logoutButtonText}>Déconnexion</Text>
-                </TouchableOpacity>
             </View>
 
             {(dailyTotals || calorieTarget) && (

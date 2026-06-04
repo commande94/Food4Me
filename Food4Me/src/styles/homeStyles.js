@@ -486,8 +486,103 @@ export const homeStyles = StyleSheet.create({
         marginBottom: 20,
         width: "100%",
         alignSelf: "stretch",
-        marginHorizontal: 0, width: "100%",
-        alignSelf: "stretch",
         marginHorizontal: 0,
+    },
+
+    mealsSection: {
+        width: "100%",
+        marginTop: 8,
+        paddingHorizontal: 16,
+    },
+
+    mealsSectionTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#2c3e50",
+        marginBottom: 12,
+    },
+
+    mealCard: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+
+    mealHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: 6,
+    },
+
+    mealName: {
+        flex: 1,
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#2c3e50",
+        marginRight: 8,
+    },
+
+    mealTime: {
+        fontSize: 12,
+        color: "#888",
+    },
+
+    mealCalories: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#e67e22",
+        marginBottom: 4,
+    },
+
+    mealMacros: {
+        fontSize: 12,
+        color: "#666",
+    },
+
+    mealActions: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        gap: 12,
+        marginTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: "#f0f0f0",
+        paddingTop: 8,
+    },
+
+    mealActionBtn: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+    },
+
+    mealActionEdit: {
+        fontSize: 13,
+        color: "#3498db",
+        fontWeight: "600",
+    },
+
+    mealActionDelete: {
+        fontSize: 13,
+        color: "#e74c3c",
+        fontWeight: "600",
+    },
+
+    mealsEmpty: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+        alignItems: "center",
+    },
+
+    mealsEmptyText: {
+        fontSize: 14,
+        color: "#888",
+        textAlign: "center",
     },
 });

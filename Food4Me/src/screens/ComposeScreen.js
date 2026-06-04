@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { searchIngredients } from "../services/ingredientService";
-import { saveComposedMeal } from "../services/foodService";
+import { createComposedMeal, getMealDetail, updateMealComposition } from "../services/foodService";
 import { warmupBackend } from "../services/warmupService";
 import { globalStyles } from "../styles/globalStyles";
 import { composeStyles } from "../styles/composeStyles";
@@ -19,6 +19,8 @@ function generateMealName(items) {
 
 export default function ComposeScreen({ navigation, route }) {
     const token = route.params?.token;
+    const editMealId = route.params?.editMealId ?? null;   // null = création, number = édition
+
     const [composeItems, setComposeItems] = useState([]);
     const [composeNomRepas, setComposeNomRepas] = useState("");
     const [composeSearch, setComposeSearch] = useState("");
@@ -26,13 +28,40 @@ export default function ComposeScreen({ navigation, route }) {
     const [composeFound, setComposeFound] = useState(null);
     const [composeGrams, setComposeGrams] = useState("100");
     const [searching, setSearching] = useState(false);
+    const [loadingDetail, setLoadingDetail] = useState(false);
+    // mode édition : inline edit quantité
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editingGrams, setEditingGrams] = useState("");
 
     const abortController = useRef(null);
 
+    // Chargement initial en mode édition
+    useEffect(() => {
+        if (!editMealId) return;
+        setLoadingDetail(true);
+        getMealDetail(token, editMealId)
+            .then((data) => {
+                setComposeNomRepas(data.nom_repas || "");
+                setComposeItems(
+                    data.items.map((i) => ({
+                        id: i.id_ingredient,
+                        name: i.nom,
+                        grams: Number(i.quantite_grammes),
+                        cal: Number(i.calories_pour_100g),
+                        prot: Number(i.proteines_pour_100g),
+                        glu: Number(i.glucides_pour_100g),
+                        lip: Number(i.lipides_pour_100g),
+                    }))
+                );
+            })
+            .catch(() => Alert.alert("Erreur", "Impossible de charger les ingrédients du repas."))
+            .finally(() => setLoadingDetail(false));
+    }, [editMealId]);
+
     useFocusEffect(
         React.useCallback(() => {
-            warmupBackend();
-        }, [])
+            if (!editMealId) warmupBackend();
+        }, [editMealId])
     );
 
     useEffect(() => {
@@ -123,6 +152,22 @@ export default function ComposeScreen({ navigation, route }) {
 
     const removeIngredient = (index) => {
         setComposeItems(composeItems.filter((_, i) => i !== index));
+        if (editingIndex === index) setEditingIndex(null);
+    };
+
+    const startEditGrams = (index) => {
+        setEditingIndex(index);
+        setEditingGrams(String(composeItems[index].grams));
+    };
+
+    const confirmEditGrams = (index) => {
+        const g = parseFloat(editingGrams);
+        if (!isNaN(g) && g > 0) {
+            const updated = [...composeItems];
+            updated[index] = { ...updated[index], grams: g };
+            setComposeItems(updated);
+        }
+        setEditingIndex(null);
     };
 
     const totals = composeItems.reduce((acc, item) => {
@@ -144,26 +189,24 @@ export default function ComposeScreen({ navigation, route }) {
         const mealName = composeNomRepas.trim() || generateMealName(composeItems);
 
         try {
-            const mealData = {
-                nom_produit: mealName,
-                nutriments: {
-                    cal: Math.round(totals.cal),
-                    prot: parseFloat(totals.prot.toFixed(1)),
-                    glu: parseFloat(totals.glu.toFixed(1)),
-                    lip: parseFloat(totals.lip.toFixed(1)),
-                },
-                quantite: 100,
-            };
-
-            const res = await saveComposedMeal(token, mealData);
-            if (res.message) {
-                Alert.alert("Succès !", "Repas enregistré !");
-                setComposeItems([]);
-                setComposeNomRepas("");
-                navigation.goBack();
+            if (editMealId) {
+                // MODE ÉDITION — remplace la composition existante
+                await updateMealComposition(token, editMealId, {
+                    nom_repas: mealName,
+                    items: composeItems,
+                });
+                Alert.alert("Succès !", "Repas modifié !");
             } else {
-                Alert.alert("Erreur", res.error || "Impossible de sauvegarder le repas.");
+                // MODE CRÉATION — chaque ingrédient est stocké séparément
+                await createComposedMeal(token, {
+                    nom_repas: mealName,
+                    items: composeItems,
+                });
+                Alert.alert("Succès !", "Repas enregistré !");
             }
+            setComposeItems([]);
+            setComposeNomRepas("");
+            navigation.goBack();
         } catch (err) {
             Alert.alert("Erreur", "Le serveur est injoignable ou ne répond pas.");
         }
@@ -183,9 +226,18 @@ export default function ComposeScreen({ navigation, route }) {
                         <TouchableOpacity onPress={() => navigation.goBack()}>
                             <Text style={composeStyles.backLink}>← Retour</Text>
                         </TouchableOpacity>
-                        <Text style={composeStyles.title}>Ajouter un repas</Text>
+                        <Text style={composeStyles.title}>
+                            {editMealId ? "Modifier le repas" : "Ajouter un repas"}
+                        </Text>
                         <View style={{ width: 60 }} />
                     </View>
+
+                    {loadingDetail && (
+                        <View style={{ alignItems: "center", marginVertical: 20 }}>
+                            <ActivityIndicator color="#2ecc71" />
+                            <Text style={{ color: "#7f8c8d", marginTop: 8 }}>Chargement des ingrédients...</Text>
+                        </View>
+                    )}
 
                     <TextInput
                         style={globalStyles.input}
@@ -276,7 +328,34 @@ export default function ComposeScreen({ navigation, route }) {
                             <Text style={composeStyles.subtitle}>Aliments ajoutés :</Text>
                             {composeItems.map((item, idx) => (
                                 <View key={idx} style={composeStyles.ingredientRow}>
-                                    <Text style={composeStyles.ingredientItem}>🥄 {item.name} — {item.grams}g</Text>
+                                    <View style={{ flex: 1, marginRight: 8 }}>
+                                        <Text style={composeStyles.ingredientItem}>🥄 {item.name}</Text>
+                                        {editingIndex === idx ? (
+                                            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                                                <TextInput
+                                                    style={[globalStyles.input, { flex: 1, marginBottom: 0, paddingVertical: 4 }]}
+                                                    value={editingGrams}
+                                                    onChangeText={setEditingGrams}
+                                                    keyboardType="numeric"
+                                                    autoFocus
+                                                    onSubmitEditing={() => confirmEditGrams(idx)}
+                                                />
+                                                <Text style={{ marginLeft: 4, color: "#555" }}>g</Text>
+                                                <TouchableOpacity
+                                                    style={{ marginLeft: 8, backgroundColor: "#2ecc71", borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 }}
+                                                    onPress={() => confirmEditGrams(idx)}
+                                                >
+                                                    <Text style={{ color: "#fff", fontWeight: "600" }}>OK</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        ) : (
+                                            <TouchableOpacity onPress={() => startEditGrams(idx)}>
+                                                <Text style={{ color: "#3498db", fontSize: 13, marginTop: 2 }}>
+                                                    ✏️ {item.grams}g — toucher pour modifier
+                                                </Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
                                     <TouchableOpacity onPress={() => removeIngredient(idx)}>
                                         <Text style={composeStyles.removeText}>❌</Text>
                                     </TouchableOpacity>
@@ -303,7 +382,7 @@ export default function ComposeScreen({ navigation, route }) {
                         disabled={composeItems.length === 0}
                     >
                         <Text style={globalStyles.buttonText}>
-                            {composeItems.length === 1 ? "✓ Enregistrer ce repas" : "💾 Enregistrer ce repas"}
+                            {editMealId ? "💾 Enregistrer les modifications" : "💾 Enregistrer ce repas"}
                         </Text>
                     </TouchableOpacity>
                 </View>

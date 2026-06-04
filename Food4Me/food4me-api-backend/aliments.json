@@ -24568,5 +24568,75 @@
         "proteines": 0,
         "glucides": 0,
         "lipides": 0
+    },
+    {
+        "nom": "Steaks hachés 5%MG (Charal)",
+        "calories": 126,
+        "proteines": 20,
+        "glucides": 0,
+        "lipides": 5
+    },
+    {
+        "nom": "Steack Haché 15% (Charal)",
+        "calories": 209,
+        "proteines": 19,
+        "glucides": 0,
+        "lipides": 15
+    },
+    {
+        "nom": "Steak haché Charal authentique (Charal)",
+        "calories": 170,
+        "proteines": 20,
+        "glucides": 0,
+        "lipides": 10
+    },
+    {
+        "nom": "Steaks hachés 5% pur Boeuf (CHARAL)",
+        "calories": 125,
+        "proteines": 20,
+        "glucides": 0,
+        "lipides": 5
+    },
+    {
+        "nom": "1 steak haché pur boeuf 5% M.G (Charal)",
+        "calories": 125,
+        "proteines": 20,
+        "glucides": 0,
+        "lipides": 5
+    },
+    {
+        "nom": "2 Steaks Hachés 5% M.G Bio (Charal)",
+        "calories": 129,
+        "proteines": 21,
+        "glucides": 0,
+        "lipides": 5
+    },
+    {
+        "nom": "Grand cru de charal (Charal)",
+        "calories": 192,
+        "proteines": 21,
+        "glucides": 0,
+        "lipides": 12
+    },
+    {
+        "nom": "Le Pur Bœuf 5% de M.G. (CHARAL)",
+        "calories": 129,
+        "proteines": 20,
+        "glucides": 0,
+        "lipides": 5
+    },
+    {
+        "nom": "Steaks hachés pur bœuf 15%MG (Charal)",
+        "calories": 213,
+        "proteines": 19.5,
+        "glucides": 0,
+        "lipides": 15
+    },
+    {
+        "nom": "Steak Haché Bio (Charal)",
+        "calories": 129,
+        "proteines": 22,
+        "glucides": 0,
+        "lipides": 4.6
     }
 ]

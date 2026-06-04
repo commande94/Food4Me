@@ -77,3 +77,74 @@ export const getDailyTotals = async (token) => {
         throw err;
     }
 };
+
+export const createComposedMeal = async (token, { nom_repas, items }) => {
+    const response = await fetch(`${API_URL}/repas/ajouter-compose`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nom_repas, items }),
+    });
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    return response.json();
+};
+
+export const getMealDetail = async (token, id) => {
+    const response = await fetch(`${API_URL}/repas/${id}/detail`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    return response.json();
+};
+
+export const updateMealComposition = async (token, id, { nom_repas, items }) => {
+    const response = await fetch(`${API_URL}/repas/${id}/composition`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nom_repas, items }),
+    });
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    return response.json();
+};
+
+export const deleteMeal = async (token, id) => {
+    const response = await fetch(`${API_URL}/repas/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    return response.json();
+};
+
+export const renameMeal = async (token, id, nom_repas) => {
+    const response = await fetch(`${API_URL}/repas/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nom_repas }),
+    });
+    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+    return response.json();
+};
+
+export const getTodayMeals = async (token) => {
+    const response = await fetch(`${API_URL}/repas/liste-aujourdhui`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Erreur ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.repas || [];
+};

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getDailyTotals } from "../services/foodService";
+import { getDailyTotals, getTodayMeals, deleteMeal } from "../services/foodService";
 import { me as getProfile } from "../services/authService";
 import { globalStyles } from "../styles/globalStyles";
 import { homeStyles } from "../styles/homeStyles";
@@ -12,6 +12,8 @@ import { Animated } from "react-native";
 export default function HomeScreen({ navigation }) {
     const [token, setToken] = useState(null);
     const [dailyTotals, setDailyTotals] = useState(null);
+    const [todayMeals, setTodayMeals] = useState([]);
+    const [loadingMeals, setLoadingMeals] = useState(false);
     const [profile, setProfile] = useState(null);
     const [calorieTarget, setCalorieTarget] = useState(null);
     const animatedValue = useState(new Animated.Value(0))[0];
@@ -121,36 +123,87 @@ export default function HomeScreen({ navigation }) {
         return "#ef4444";                      // rouge
     };
 
-    // Charger les totals quand l'écran est affiché
+    const refreshMeals = async () => {
+        if (!token) return;
+        try {
+            const [totals, meals] = await Promise.all([
+                getDailyTotals(token),
+                getTodayMeals(token),
+            ]);
+            setDailyTotals(totals);
+            setTodayMeals(meals);
+        } catch (e) {
+            console.error("❌ Erreur refresh:", e);
+        }
+    };
+
+    const handleDelete = (meal) => {
+        Alert.alert(
+            "Supprimer ce repas",
+            `Supprimer « ${meal.nom_repas} » ?`,
+            [
+                { text: "Annuler", style: "cancel" },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await deleteMeal(token, meal.id_repas);
+                            await refreshMeals();
+                        } catch (e) {
+                            Alert.alert("Erreur", "Impossible de supprimer ce repas.");
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    const formatMealTime = (dateString) => {
+        if (!dateString) return "";
+        return new Date(dateString).toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
+    // Charger totals + repas du jour quand l'écran est affiché
     useFocusEffect(
         useCallback(() => {
             if (!token) return;
+
             (async () => {
+                setLoadingMeals(true);
                 try {
-                    console.log("📊 Chargement des totals du jour...");
-                    const data = await getDailyTotals(token);
-                    console.log("✅ Totals chargés:", data);
-                    setDailyTotals(data);
+                    const [totals, meals] = await Promise.all([
+                        getDailyTotals(token),
+                        getTodayMeals(token),
+                    ]);
+                    setDailyTotals(totals);
+                    setTodayMeals(meals);
                 } catch (e) {
-                    console.error("❌ Erreur synthèse jour:", e);
+                    console.error("❌ Erreur chargement journal:", e);
+                } finally {
+                    setLoadingMeals(false);
                 }
             })();
-        }, [token]),
-        useEffect(() => {
-            if (!calorieTarget) return;
+        }, [token])
+    );
 
-            const value = Math.min(
-                (dailyTotals?.calories || 0) / calorieTarget,
-                1
-            );
+    useEffect(() => {
+        if (!calorieTarget) return;
 
-            Animated.timing(animatedValue, {
-                toValue: value,
-                duration: 800,
-                useNativeDriver: false,
-            }).start();
-        }, [dailyTotals, calorieTarget]
-        ));
+        const value = Math.min(
+            (dailyTotals?.calories || 0) / calorieTarget,
+            1
+        );
+
+        Animated.timing(animatedValue, {
+            toValue: value,
+            duration: 800,
+            useNativeDriver: false,
+        }).start();
+    }, [dailyTotals, calorieTarget, animatedValue]);
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem("token");
@@ -292,28 +345,66 @@ export default function HomeScreen({ navigation }) {
 
                     </View></View>
             )}
-            <Text style={homeStyles.menuTitle}>Que souhaitez-vous faire ?</Text>
+            <Text style={[homeStyles.menuTitle, { paddingHorizontal: 16 }]}>Que souhaitez-vous faire ?</Text>
 
-            <TouchableOpacity
-                style={[homeStyles.menuButton, { backgroundColor: "#2ecc71" }]}
-                onPress={() => navigation.navigate("Compose", { token })}
-            >
-                <Text style={homeStyles.menuButtonText}>➕ Ajouter un repas</Text>
-                <Text style={homeStyles.menuButtonSub}>Rechercher un aliment et composer votre repas</Text>
-            </TouchableOpacity>
+            <View style={{ paddingHorizontal: 16 }}>
+                <TouchableOpacity
+                    style={[homeStyles.menuButton, { backgroundColor: "#2ecc71" }]}
+                    onPress={() => navigation.navigate("Compose", { token })}
+                >
+                    <Text style={homeStyles.menuButtonText}>➕ Ajouter un repas</Text>
+                    <Text style={homeStyles.menuButtonSub}>Rechercher un aliment et composer votre repas</Text>
+                </TouchableOpacity>
+            </View>
 
-            {/* SYNTHÈSE DU JOUR */}
-            {dailyTotals && (
-                <View style={homeStyles.dailyCard}>
-                    <Text style={homeStyles.dailyTitle}>📊 Aujourd&apos;hui</Text>
-                    <View style={homeStyles.dailyRow}>
-                        <Text style={homeStyles.dailyMacro}>🔥 Calories : {dailyTotals.calories} kcal</Text>
-                        <Text style={homeStyles.dailyMacro}>🥩 Protéines : {dailyTotals.proteines} g</Text>
-                        <Text style={homeStyles.dailyMacro}>🍞 Glucides : {dailyTotals.glucides} g</Text>
-                        <Text style={homeStyles.dailyMacro}>🥑 Lipides : {dailyTotals.lipides} g</Text>
+            <View style={homeStyles.mealsSection}>
+                <Text style={homeStyles.mealsSectionTitle}>🍽️ Repas enregistrés aujourd&apos;hui</Text>
+
+                {loadingMeals ? (
+                    <View style={homeStyles.mealsEmpty}>
+                        <Text style={homeStyles.mealsEmptyText}>Chargement...</Text>
                     </View>
-                </View>
-            )}
+                ) : todayMeals.length === 0 ? (
+                    <View style={homeStyles.mealsEmpty}>
+                        <Text style={homeStyles.mealsEmptyText}>
+                            Aucun repas enregistré aujourd&apos;hui. Ajoutez votre premier repas ci-dessus.
+                        </Text>
+                    </View>
+                ) : (
+                    todayMeals.map((meal) => (
+                        <View key={meal.id_repas} style={homeStyles.mealCard}>
+                            <View style={homeStyles.mealHeader}>
+                                <Text style={homeStyles.mealName} numberOfLines={2}>
+                                    {meal.nom_repas}
+                                </Text>
+                                <Text style={homeStyles.mealTime}>
+                                    {formatMealTime(meal.date_repas)}
+                                </Text>
+                            </View>
+                            <Text style={homeStyles.mealCalories}>
+                                🔥 {meal.calories} kcal
+                            </Text>
+                            <Text style={homeStyles.mealMacros}>
+                                P: {meal.proteines}g · G: {meal.glucides}g · L: {meal.lipides}g
+                            </Text>
+                            <View style={homeStyles.mealActions}>
+                                <TouchableOpacity
+                                    style={homeStyles.mealActionBtn}
+                                    onPress={() => navigation.navigate("Compose", { token, editMealId: meal.id_repas })}
+                                >
+                                    <Text style={homeStyles.mealActionEdit}>✏️ Modifier</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={homeStyles.mealActionBtn}
+                                    onPress={() => handleDelete(meal)}
+                                >
+                                    <Text style={homeStyles.mealActionDelete}>🗑️ Supprimer</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ))
+                )}
+            </View>
         </ScrollView>
     );
 }

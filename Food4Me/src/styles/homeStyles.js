@@ -354,25 +354,6 @@ export const homeStyles = StyleSheet.create({
         padding: 20,
         marginTop: 20,
     },
-
-    topBar: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 20,
-    },
-
-    dateText: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: "#2ecc71",
-    },
-
-    topIcons: {
-        flexDirection: "row",
-        gap: 10,
-    },
-
     gaugeSection: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -483,12 +464,18 @@ export const homeStyles = StyleSheet.create({
         backgroundColor: "#d4fee6",
         borderRadius: 30,
         padding: 10,
-        marginBottom: 20,
         width: "100%",
-        alignSelf: "stretch",
-        marginHorizontal: 0,
-    },
+        marginTop: 0,
+        marginBottom: 20,
 
+        overflow: "hidden",
+
+        // effet premium
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 3,
+    },
     mealsSection: {
         width: "100%",
         marginTop: 8,
@@ -584,5 +571,71 @@ export const homeStyles = StyleSheet.create({
         fontSize: 14,
         color: "#888",
         textAlign: "center",
+    },
+    horizontalDashboard: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 12,
+        marginTop: 10,
+    },
+
+    mainCard: {
+        flex: 2,
+        backgroundColor: "#1e1e1e",
+        borderRadius: 16,
+        padding: 16,
+    },
+
+    sideCard: {
+        flex: 1,
+        backgroundColor: "#2a2a2a",
+        borderRadius: 16,
+        padding: 14,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    bigCalories: {
+        fontSize: 28,
+        fontWeight: "bold",
+        color: "#fff",
+    },
+
+    caloriesSub: {
+        color: "#aaa",
+        marginBottom: 10,
+    },
+
+    progressBackground: {
+        height: 8,
+        backgroundColor: "#333",
+        borderRadius: 10,
+        overflow: "hidden",
+        marginVertical: 10,
+    },
+
+    progressFill: {
+        height: "100%",
+        borderRadius: 10,
+    },
+
+    progressText: {
+        color: "#aaa",
+        fontSize: 12,
+        textAlign: "right",
+    },
+
+    statLabel: {
+        color: "#aaa",
+        fontSize: 12,
+        marginBottom: 6,
+        textAlign: "center",
+    },
+
+    statValue: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#fff",
     },
 });

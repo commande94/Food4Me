@@ -212,10 +212,12 @@ export default function HomeScreen({ navigation }) {
     };
 
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{
-            paddingTop: 20,
-            paddingBottom: 120
-        }}>
+        <ScrollView
+            style={{ flex: 1, backgroundColor: "#f9f9f9" }}
+            contentContainerStyle={{
+                paddingBottom: 120
+            }}
+        >
             {/* HEADER */}
             <View style={homeStyles.header}>
                 <Text style={homeStyles.title}>Food4Me</Text>
@@ -228,73 +230,52 @@ export default function HomeScreen({ navigation }) {
                 <View style={homeStyles.dashboardWrapper}>
                     <View style={homeStyles.modernDashboard}>
 
-                        {/* HEADER MINI */}
-                        <View style={homeStyles.topBar}>
-                            <Text style={homeStyles.dateText}>
-                                📅 AUJOURD’HUI
-                            </Text>
+                        {/* DASHBOARD HORIZONTAL */}
+                        <View style={homeStyles.horizontalDashboard}>
 
-                            <View style={homeStyles.topIcons}>
-                                <Text>🔔</Text>
-                                <Text>👤</Text>
+                            {/* CARD PRINCIPALE */}
+                            <View style={homeStyles.mainCard}>
+                                <Text style={homeStyles.bigCalories}>
+                                    {dailyTotals?.calories || 0}
+                                </Text>
+
+                                <Text style={homeStyles.caloriesSub}>
+                                    / {calorieTarget || 0} kcal
+                                </Text>
+
+                                <View style={homeStyles.progressBackground}>
+                                    <Animated.View
+                                        style={[
+                                            homeStyles.progressFill,
+                                            {
+                                                width: `${Math.min(progress * 100, 100)}%`,
+                                                backgroundColor: getProgressColor(),
+                                            },
+                                        ]}
+                                    />
+                                </View>
+
+                                <Text style={homeStyles.progressText}>
+                                    {Math.round(progress * 100)}%
+                                </Text>
                             </View>
-                        </View>
 
-                        {/* GAUGE CENTRAL */}
-                        <View style={homeStyles.gaugeSection}>
-
-                            {/* LEFT STATS */}
-                            <View style={homeStyles.sideStat}>
-                                <Text style={homeStyles.statLabel}>Consommé</Text>
+                            {/* CARD CONSOMMÉ */}
+                            <View style={homeStyles.sideCard}>
+                                <Text style={homeStyles.statLabel}>🔥 Consommé</Text>
                                 <Text style={homeStyles.statValue}>
                                     {dailyTotals?.calories || 0}
                                 </Text>
                             </View>
 
-                            {/* GAUGE */}
-                            <View
-                                style={[
-                                    homeStyles.gaugeCircle,
-                                    { borderColor: getProgressColor() }
-                                ]}
-                            >
-                                <Animated.View
-                                    pointerEvents="none"
-                                    style={{
-                                        position: "relative",
-                                        position: "absolute",
-                                        width: 160,
-                                        height: 160,
-                                        borderRadius: 80,
-                                        borderWidth: 12,
-                                        borderColor: getProgressColor(),
-                                        opacity: animatedValue,
-                                    }}
-                                />
-                                <View style={homeStyles.gaugeInner}>
-
-                                    <Text style={homeStyles.gaugeSmallText}>
-                                        Objectif
-                                    </Text>
-
-                                    <Text style={homeStyles.gaugeBigText}>
-                                        {calorieTarget || 0}
-                                    </Text>
-
-                                    <Text style={homeStyles.gaugeSubText}>
-                                        kcal
-                                    </Text>
-
-                                </View>
-                            </View>
-
-                            {/* RIGHT STATS */}
-                            <View style={homeStyles.sideStat}>
-                                <Text style={homeStyles.statLabel}>Restant</Text>
+                            {/* CARD RESTANT */}
+                            <View style={homeStyles.sideCard}>
+                                <Text style={homeStyles.statLabel}>⚡ Restant</Text>
                                 <Text style={homeStyles.statValue}>
                                     {remainingCalories ?? 0}
                                 </Text>
                             </View>
+
                         </View>
 
                         {/* OBJECTIF BADGE */}
@@ -343,8 +324,8 @@ export default function HomeScreen({ navigation }) {
 
                         </View>
 
-                    </View></View>
-            )}
+                    </View>
+                </View>)}
             <Text style={[homeStyles.menuTitle, { paddingHorizontal: 16 }]}>Que souhaitez-vous faire ?</Text>
 
             <View style={{ paddingHorizontal: 16 }}>

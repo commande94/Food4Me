@@ -24638,5 +24638,33 @@
         "proteines": 22,
         "glucides": 0,
         "lipides": 4.6
+    },
+    {
+        "nom": "Bouf Bourguignon (Aldi)",
+        "calories": 78,
+        "proteines": 8,
+        "glucides": 4.5,
+        "lipides": 3
+    },
+    {
+        "nom": "Burger au fromage Roude Bouf",
+        "calories": 258,
+        "proteines": 22.1,
+        "glucides": 0.8,
+        "lipides": 18.5
+    },
+    {
+        "nom": "Berdorfer Roude Bouf",
+        "calories": 0,
+        "proteines": 0,
+        "glucides": 0,
+        "lipides": 0
+    },
+    {
+        "nom": "Tkt c dla bouf",
+        "calories": 522,
+        "proteines": 6.8,
+        "glucides": 52,
+        "lipides": 31
     }
 ]

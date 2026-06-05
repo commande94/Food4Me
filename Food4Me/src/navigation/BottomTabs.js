@@ -19,6 +19,7 @@ import {
 } from "@expo/vector-icons";
 
 import HomeScreen from "../screens/HomeScreen";
+import DashboardScreen from "../screens/DashboardScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -50,6 +51,10 @@ function CustomTabBar({ state, navigation }) {
 
                         if (route.name === "Profile") {
                             handleLogout();
+                            return;
+                        }
+
+                        if (route.name !== "Home" && route.name !== "Dashboard") {
                             return;
                         }
 
@@ -170,7 +175,7 @@ export default function BottomTabs() {
         >
 
             <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Dashboard" component={HomeScreen} />
+            <Tab.Screen name="Dashboard" component={DashboardScreen} />
             <Tab.Screen name="Add" component={HomeScreen} />
             <Tab.Screen name="Meals" component={HomeScreen} />
             <Tab.Screen name="Profile" component={HomeScreen} />

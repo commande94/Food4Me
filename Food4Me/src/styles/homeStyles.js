@@ -349,17 +349,526 @@ export const homeStyles = StyleSheet.create({
     },
 
     modernDashboard: {
-        backgroundColor: "transparent",
-        borderRadius: 30,
-        padding: 20,
+        backgroundColor: "#ffffff",
+        borderRadius: 32,
+        padding: 18,
         marginTop: 20,
+        shadowColor: "#0b3d91",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.06,
+        shadowRadius: 18,
+        elevation: 8,
+    },
+    screen: {
+        flex: 1,
+        backgroundColor: "transparent",
+    },
+
+    pageSplitWrapper: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        flexDirection: "column",
+        zIndex: 0,
+    },
+
+    pageSplitTop: {
+        flex: 0.6,
+        position: "relative",
+        overflow: "hidden",
+    },
+
+    pageBlendGreen: {
+        position: "absolute",
+        top: -10,
+        left: -40,
+        right: -20,
+        height: 300,
+        backgroundColor: "#7EE7B1",
+        opacity: 0.92,
+        transform: [{ rotate: "-6deg" }],
+        borderBottomRightRadius: 56,
+    },
+
+    pageBlendOrange: {
+        position: "absolute",
+        top: -8,
+        right: -40,
+        left: -20,
+        height: 290,
+        backgroundColor: "#FFB78B",
+        opacity: 0.9,
+        transform: [{ rotate: "6deg" }],
+        borderBottomLeftRadius: 56,
+    },
+
+    pageSplitBottom: {
+        flex: 0.4,
+        backgroundColor: "#f5f0e1", // beige en bas
+    },
+
+    dashboardBackground: {
+        width: "100%",
+        borderRadius: 12,
+        padding: 12,
+        backgroundColor: "transparent",
+        marginTop: 12,
+        marginBottom: 20,
+        marginHorizontal: 0,
+    },
+
+    dashboardCard: {
+        backgroundColor: "#ffffff",
+        borderRadius: 28,
+        padding: 18,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.06,
+        shadowRadius: 24,
+        elevation: 6,
+    },
+
+    cardHeader: {
+        marginBottom: 18,
+    },
+
+    cardHeaderRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingHorizontal: 12,
+        paddingTop: 18,
+    },
+
+    logoContainer: {
+        width: 64,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    logoBox: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        backgroundColor: "#e6f5e8",
+        borderWidth: 1,
+        borderColor: "#cfe8d6",
+    },
+
+    cardHeaderText: {
+        flex: 1,
+    },
+
+    brandTitle: {
+        fontSize: 14,
+        fontWeight: "800",
+        color: "#166534",
+    },
+    topContainer: {
+        width: "100%",
+        backgroundColor: "transparent",
+        paddingHorizontal: 10,
+        paddingTop: 10,
+        paddingBottom: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.08,
+        shadowRadius: 15,
+        elevation: 8,
+        zIndex: 10,
+    },
+
+    topBox: {
+        width: "100%",
+        height: 72,
+        borderRadius: 0,
+        backgroundColor: "transparent",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        flexDirection: "row",
+        paddingLeft: 6,
+        paddingRight: 12,
+    },
+
+    topLogo: {
+        width: 60,
+        height: 80,
+        borderRadius: 0,
+        backgroundColor: "transparent",
+        marginLeft: 0,
+    },
+
+    topLogoBg: {
+        backgroundColor: "#f9f9f9",
+        padding: 6,
+        borderRadius: 12,
+        marginLeft: 0,
+        zIndex: 3,
+    },
+
+    topBoxText: {
+        fontSize: 22,
+        fontWeight: "900",
+        color: "#f9f9f9",
+    },
+    topWrapper: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 20,
+    },
+
+    containerTop: {
+        flexDirection: "row",
+        backgroundColor: "transparent",
+        borderBottomWidth: 0.5,
+        borderBottomColor: "#f9f9f9",
+        height: 120,
+        shadowOpacity: 0.12,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 8,
+        paddingTop: 10,
+        paddingBottom: 10,
+        overflow: "hidden",
+        shadowOpacity: 0.08,
+        shadowRadius: 15,
+        shadowOffset: {
+            width: 0,
+            height: 5
+        },
+
+        elevation: 8,
+    },
+
+    topGradient: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 120,
+        flexDirection: "row",
+        zIndex: 1,
+    },
+    cardMainGauge: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 18,
+        backgroundColor: "#ffffff",
+        borderRadius: 20,
+        marginBottom: 14,
+    },
+
+    bigCalValue: {
+        fontSize: 52,
+        fontWeight: "900",
+        color: "#0f3c1f",
+        lineHeight: 56,
+    },
+
+    bigCalUnit: {
+        fontSize: 14,
+        color: "#6b8f6e",
+        marginTop: 4,
+    },
+
+    exceededColor: {
+        color: "#b91c1c",
+    },
+
+    exceededText: {
+        marginTop: 8,
+        fontSize: 13,
+        color: "#b91c1c",
+        fontWeight: "700",
+    },
+
+    withinText: {
+        marginTop: 8,
+        fontSize: 13,
+        color: "#2f6f3a",
+        fontWeight: "700",
+    },
+
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: "900",
+        color: "#0f3c1f",
+        marginBottom: 4,
+    },
+
+    inlineCalorieTitle: {
+        fontSize: 16,
+        fontWeight: "800",
+        color: "#0f3c1f",
+        marginBottom: 4,
+    },
+
+    inlineCalorieValue: {
+        fontSize: 38,
+        fontWeight: "900",
+        color: "#15803d",
+        marginBottom: 4,
+    },
+
+    inlineCalorieUnit: {
+        fontSize: 16,
+        color: "#444",
+        marginLeft: 6,
+        marginBottom: 8,
+    },
+
+    inlineCalorieText: {
+        fontSize: 14,
+        color: "#166534",
+        marginBottom: 4,
+    },
+
+    inlineCalorieOk: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#15803d",
+        marginBottom: 16,
+    },
+
+    inlineCalorieAlert: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#dc2626",
+        marginBottom: 16,
+    },
+
+    cardSubtitle: {
+        fontSize: 13,
+        color: "#4b6b45",
+    },
+
+    cardStatsRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 18,
+    },
+
+    cardStatItem: {
+        flex: 1,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        backgroundColor: "#f3fbf4",
+        borderRadius: 20,
+        marginRight: 10,
+    },
+
+    cardStatLabel: {
+        fontSize: 12,
+        color: "#5a7a5d",
+        marginBottom: 4,
+    },
+
+    cardStatValue: {
+        fontSize: 26,
+        fontWeight: "900",
+        color: "#1d4224",
+    },
+
+    cardStatUnit: {
+        fontSize: 12,
+        color: "#8aa485",
+        marginTop: 2,
+    },
+
+    progressPanel: {
+        marginBottom: 16,
+    },
+
+    progressTrack: {
+        width: "100%",
+        height: 12,
+        backgroundColor: "#def0d9",
+        borderRadius: 999,
+        overflow: "hidden",
+        marginBottom: 8,
+    },
+
+    progressFill: {
+        height: "100%",
+        borderRadius: 999,
+    },
+
+    progressText: {
+        fontSize: 12,
+        fontWeight: "700",
+        textAlign: "right",
+    },
+
+    cardHintText: {
+        fontSize: 13,
+        color: "#556f53",
+        lineHeight: 20,
+        marginBottom: 16,
+    },
+
+    macroSummaryRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 10,
+    },
+
+    macroCard: {
+        flex: 1,
+        backgroundColor: "#f7fdf7",
+        borderRadius: 18,
+        padding: 12,
+        alignItems: "center",
+    },
+
+    macroLabel: {
+        fontSize: 11,
+        color: "#4f6b51",
+        marginBottom: 6,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+    },
+
+    macroValue: {
+        fontSize: 18,
+        fontWeight: "800",
+        color: "#284b29",
+    },
+
+    dashboardOverview: {
+        width: "100%",
+    },
+
+    overviewCard: {
+        backgroundColor: "#f9fbff",
+        borderRadius: 28,
+        padding: 20,
+        marginBottom: 18,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.04,
+        shadowRadius: 16,
+        elevation: 4,
+    },
+
+    overviewHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+
+    overviewTitle: {
+        fontSize: 16,
+        fontWeight: "800",
+        color: "#1f2937",
+    },
+
+    overviewStatus: {
+        fontSize: 12,
+        fontWeight: "700",
+        textTransform: "uppercase",
+    },
+
+    overviewNumbers: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        marginBottom: 18,
+    },
+
+    overviewColumn: {
+        width: "48%",
+    },
+
+    overviewAmount: {
+        fontSize: 32,
+        fontWeight: "900",
+        color: "#111827",
+    },
+
+    overviewSubtitle: {
+        fontSize: 12,
+        color: "#667085",
+        marginTop: 4,
+    },
+
+    progressContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+    },
+
+    progressTrack: {
+        flex: 1,
+        height: 14,
+        backgroundColor: "#e7efff",
+        borderRadius: 999,
+        overflow: "hidden",
+    },
+
+    progressFill: {
+        height: "100%",
+        borderRadius: 999,
+    },
+
+    progressPercent: {
+        fontSize: 13,
+        fontWeight: "800",
+    },
+
+    summaryCardsRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 10,
+    },
+
+    summaryCard: {
+        flex: 1,
+        borderRadius: 22,
+        padding: 16,
+        minHeight: 110,
+        justifyContent: "space-between",
+    },
+
+    summaryCardLeft: {
+        backgroundColor: "#ffffff",
+    },
+
+    summaryCardRight: {
+        backgroundColor: "#eef5ff",
+    },
+
+    summaryLabel: {
+        fontSize: 12,
+        fontWeight: "700",
+        color: "#475569",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+    },
+
+    summaryValue: {
+        fontSize: 22,
+        fontWeight: "900",
+        color: "#0f172a",
+        marginVertical: 8,
+    },
+
+    summaryNote: {
+        fontSize: 12,
+        color: "#64748b",
+        lineHeight: 18,
     },
 
     topBar: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 16,
     },
 
     dateText: {
@@ -371,17 +880,6 @@ export const homeStyles = StyleSheet.create({
     topIcons: {
         flexDirection: "row",
         gap: 10,
-    },
-
-    gaugeSection: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-
-    sideStat: {
-        alignItems: "center",
-        width: 80,
     },
 
     statLabel: {
@@ -454,17 +952,19 @@ export const homeStyles = StyleSheet.create({
 
     miniCard: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#f8fbff",
         marginHorizontal: 4,
-        borderRadius: 16,
-        padding: 10,
-        alignItems: "center",
+        borderRadius: 18,
+        padding: 12,
+        alignItems: "flex-start",
         elevation: 2,
     },
 
     miniTitle: {
         fontSize: 12,
-        color: "#777",
+        color: "#475569",
+        textTransform: "uppercase",
+        letterSpacing: 0.4,
     },
 
     miniValue: {
@@ -480,13 +980,12 @@ export const homeStyles = StyleSheet.create({
         borderRadius: 10,
     },
     dashboardWrapper: {
-        backgroundColor: "#d4fee6",
-        borderRadius: 30,
-        padding: 10,
+        backgroundColor: "#eef4ff",
+        borderRadius: 34,
+        padding: 12,
         marginBottom: 20,
         width: "100%",
         alignSelf: "stretch",
-        marginHorizontal: 0,
     },
 
     mealsSection: {
@@ -584,5 +1083,296 @@ export const homeStyles = StyleSheet.create({
         fontSize: 14,
         color: "#888",
         textAlign: "center",
+    },
+    calorieBox: {
+        backgroundColor: "#fff",
+        borderRadius: 20,
+        padding: 16,
+        marginVertical: 14,
+        shadowColor: "#000",
+        shadowOpacity: 0.06,
+        shadowRadius: 10,
+        elevation: 3,
+    },
+
+    calorieTopRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        marginBottom: 10,
+    },
+
+    calorieConsumed: {
+        fontSize: 30,
+        fontWeight: "900",
+        color: "#15803d",
+    },
+
+    calorieTarget: {
+        fontSize: 14,
+        color: "#6b7280",
+        fontWeight: "600",
+    },
+
+    calorieTrack: {
+        width: "100%",
+        height: 12,
+        backgroundColor: "#e5e7eb",
+        borderRadius: 999,
+        overflow: "hidden",
+    },
+
+    calorieFill: {
+        height: "100%",
+        borderRadius: 999,
+    },
+
+    calorieHint: {
+        marginTop: 8,
+        fontSize: 13,
+        color: "#374151",
+        fontWeight: "600",
+        textAlign: "right",
+    },
+    calorieBox: {
+        backgroundColor: "#fff",
+        borderRadius: 20,
+        padding: 16,
+        marginVertical: 14,
+        shadowColor: "#000",
+        shadowOpacity: 0.06,
+        shadowRadius: 10,
+        elevation: 3,
+    },
+
+    calorieTopRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        marginBottom: 10,
+    },
+
+    calorieConsumed: {
+        fontSize: 30,
+        fontWeight: "900",
+        color: "#15803d",
+    },
+
+    calorieTarget: {
+        fontSize: 14,
+        color: "#6b7280",
+        fontWeight: "600",
+    },
+
+    calorieTrack: {
+        width: "100%",
+        height: 12,
+        backgroundColor: "#e5e7eb",
+        borderRadius: 999,
+        overflow: "hidden",
+    },
+
+    calorieFill: {
+        height: "100%",
+        borderRadius: 999,
+    },
+
+    calorieHint: {
+        marginTop: 8,
+        fontSize: 13,
+        color: "#374151",
+        fontWeight: "600",
+        textAlign: "right",
+    },
+
+    macroContainer: {
+        flexDirection: "column",
+        gap: 10,
+    },
+
+    macroBox: {
+        backgroundColor: "#fff",
+        borderRadius: 16,
+        padding: 12,
+        marginTop: 10,
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+        elevation: 2,
+    },
+
+    macroTitle: {
+        fontSize: 12,
+        fontWeight: "700",
+        color: "#374151",
+        marginBottom: 6,
+        textTransform: "uppercase",
+    },
+
+    macroText: {
+        fontSize: 14,
+        fontWeight: "800",
+        color: "#111827",
+        marginBottom: 8,
+    },
+
+    macroTrack: {
+        width: "100%",
+        height: 8,
+        backgroundColor: "#e5e7eb",
+        borderRadius: 999,
+        overflow: "hidden",
+    },
+
+    macroFill: {
+        height: "100%",
+        borderRadius: 999,
+    },
+    dashboardWrapper: {
+        paddingHorizontal: 16,
+        marginTop: 10,
+    },
+
+    modernDashboard: {
+        backgroundColor: "#fff",
+        borderRadius: 18,
+        padding: 16,
+        elevation: 3,
+    },
+
+    /* ================= CALORIES ================= */
+
+    calorieBox: {
+        marginBottom: 12,
+    },
+
+    calorieTopRow: {
+        flexDirection: "row",
+        alignItems: "baseline",
+    },
+
+    calorieConsumed: {
+        fontSize: 32,
+        fontWeight: "bold",
+        color: "#111",
+    },
+
+    calorieTarget: {
+        fontSize: 16,
+        color: "#777",
+        marginLeft: 6,
+    },
+
+    calorieTrack: {
+        height: 14,
+        backgroundColor: "#eee",
+        borderRadius: 10,
+        overflow: "hidden",
+        marginTop: 10,
+        position: "relative",
+    },
+
+    calorieFill: {
+        height: "100%",
+        borderRadius: 10,
+    },
+
+    overflowTrack: {
+        width: "100%",
+        height: 8,
+        backgroundColor: "#fee2e2",
+        borderRadius: 8,
+        overflow: "hidden",
+        marginTop: 8,
+    },
+
+    overflowTrackSmall: {
+        width: "100%",
+        height: 6,
+        backgroundColor: "#fee2e2",
+        borderRadius: 6,
+        overflow: "hidden",
+        marginTop: 6,
+    },
+
+    overflowFill: {
+        height: "100%",
+        borderRadius: 10,
+    },
+
+    analysisText: {
+        fontSize: 12,
+        color: "#475569",
+        marginTop: 8,
+        lineHeight: 18,
+    },
+
+    calorieHint: {
+        fontSize: 12,
+        color: "#666",
+        marginTop: 6,
+    },
+
+    /* ================= BADGE ================= */
+
+    goalBadge: {
+        backgroundColor: "#111",
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 20,
+        alignSelf: "flex-start",
+        marginTop: 10,
+    },
+
+    goalBadgeText: {
+        color: "#fff",
+        fontSize: 12,
+    },
+
+    /* ================= CONSEIL ================= */
+
+    dashboardHintModern: {
+        fontSize: 12,
+        color: "#666",
+        marginTop: 10,
+        lineHeight: 16,
+    },
+
+    /* ================= MACROS ================= */
+
+    bottomCards: {
+        marginTop: 16,
+        gap: 12,
+    },
+
+    macroBox: {
+        backgroundColor: "#fafafa",
+        borderRadius: 14,
+        padding: 12,
+    },
+
+    macroTitle: {
+        fontSize: 13,
+        fontWeight: "bold",
+        marginBottom: 4,
+    },
+
+    macroText: {
+        fontSize: 12,
+        color: "#666",
+        marginBottom: 6,
+    },
+
+    macroTrack: {
+        height: 10,
+        backgroundColor: "#eaeaea",
+        borderRadius: 8,
+        overflow: "hidden",
+        position: "relative",
+    },
+
+    macroFill: {
+        height: "100%",
+        borderRadius: 8,
     },
 });

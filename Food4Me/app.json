@@ -21,6 +21,7 @@
       }
     },
     "android": {
+      "package": "com.food4me.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

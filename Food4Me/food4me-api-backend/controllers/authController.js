@@ -142,20 +142,11 @@ exports.login = async (req, res) => {
 
         console.log(`🔐 LOGIN: ${email}`);
 
-        // ✅ TIMEOUT EXPLICITE POUR LA REQUÊTE
-        const loginTimeout = setTimeout(() => {
-            return res.status(503).json({
-                message: "Timeout de connexion à la base de données"
-            });
-        }, 5000);
-
         // Vérifie utilisateur
         const user = await pool.query(
             "SELECT * FROM utilisateur WHERE email = $1",
             [email]
         );
-
-        clearTimeout(loginTimeout);
 
         if (user.rows.length === 0) {
             return res.status(401).json({
@@ -207,16 +198,21 @@ exports.login = async (req, res) => {
         console.error("❌ ERREUR LOGIN:", err.message);
         console.error("Stack:", err.stack);
 
-        // ✅ GESTION DES ERREURS DB SPÉCIFIQUES
-        if (err.message.includes("timeout") || err.code === "ECONNREFUSED") {
+        if (
+            err.message.includes("timeout") ||
+            err.code === "ECONNREFUSED" ||
+            err.code === "ENETUNREACH"
+        ) {
             return res.status(503).json({
                 message: "Base de données indisponible"
             });
         }
 
-        res.status(500).json({
-            message: "Erreur serveur / réseau"
-        });
+        if (!res.headersSent) {
+            res.status(500).json({
+                message: "Erreur serveur / réseau"
+            });
+        }
     }
 };
 

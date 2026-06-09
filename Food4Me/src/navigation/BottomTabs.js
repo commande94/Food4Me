@@ -47,10 +47,16 @@ function CustomTabBar({ state, navigation }) {
                     const isFocused =
                         state.index === index;
 
-                    const onPress = () => {
+                    const onPress = async () => {
 
                         if (route.name === "Profile") {
                             handleLogout();
+                            return;
+                        }
+
+                        if (route.name === "Add") {
+                            const token = await AsyncStorage.getItem("token");
+                            navigation.navigate("Compose", { token });
                             return;
                         }
 
@@ -82,7 +88,7 @@ function CustomTabBar({ state, navigation }) {
 
                     else if (route.name === "Dashboard") {
                         iconName = isFocused ? "bar-chart" : "bar-chart-outline";
-                        label = "ProgrÃ¨s";
+                        label = "Progrès";
                     }
 
                     else if (route.name === "Add") {
@@ -91,12 +97,12 @@ function CustomTabBar({ state, navigation }) {
 
                     else if (route.name === "Meals") {
                         iconName = isFocused ? "restaurant" : "restaurant-outline";
-                        label = "RÃ©gimes";
+                        label = "Régimes";
                     }
 
                     else if (route.name === "Profile") {
                         iconName = isFocused ? "log-out" : "log-out-outline";
-                        label = "DÃ©connexion";
+                        label = "Déconnexion";
                     }
 
                     // BOUTON CENTRAL +

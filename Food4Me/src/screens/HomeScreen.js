@@ -11,20 +11,55 @@ import { Animated } from "react-native";
 const computeMacroTargets = (profile, calorieTarget) => {
     if (!profile || !calorieTarget) return null;
 
-    const weight =
-        profile.poids_kg || profile.poids || 70;
+    const weight = profile.poids_kg || profile.poids || 70;
+    const objectif = (profile.objectif || "Maintien").toLowerCase();
+    const niveau = (profile.niveau_activite || profile.niveauActivite || "").toLowerCase();
+    const gender = (profile.genre || profile.sexe || "").toLowerCase();
+    const isMale = gender.startsWith("h") || gender.startsWith("m") || gender === "homme";
 
-    // PROTEINES (1.8g/kg moyen)
-    const proteines = Math.round(weight * 1.8);
+    // ÂGE
+    const dob = profile.date_naissance || profile.dateNaissance || null;
+    let age = 30;
+    if (dob) {
+        const b = new Date(dob);
+        const today = new Date();
+        age = today.getFullYear() - b.getFullYear();
+        const m = today.getMonth() - b.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
+    }
 
-    // LIPIDES (25% calories)
-    const lipides = Math.round((calorieTarget * 0.25) / 9);
+    // PROTÉINES (g/kg) — selon objectif + niveau d'activité
+    let proteinPerKg;
+    if (objectif.includes("perte")) {
+        if (niveau.includes("très")) proteinPerKg = 2.4;
+        else if (niveau.includes("actif") && !niveau.includes("peu")) proteinPerKg = 2.2;
+        else proteinPerKg = 2.0;
+    } else if (objectif.includes("prise")) {
+        if (niveau.includes("très")) proteinPerKg = 2.2;
+        else if (niveau.includes("actif") && !niveau.includes("peu")) proteinPerKg = 2.0;
+        else proteinPerKg = 1.8;
+    } else {
+        if (niveau.includes("très")) proteinPerKg = 1.8;
+        else if (niveau.includes("actif") && !niveau.includes("peu")) proteinPerKg = 1.6;
+        else proteinPerKg = 1.4;
+    }
+    // Ajustement âge : synthèse musculaire diminue avec l'âge
+    if (age >= 60) proteinPerKg += 0.3;
+    else if (age >= 40) proteinPerKg += 0.2;
+    const proteines = Math.round(weight * proteinPerKg);
 
-    // GLUCIDES (reste des calories)
-    const remainingCalories =
-        calorieTarget - (proteines * 4 + lipides * 9);
+    // LIPIDES (% calories) — selon objectif + genre + âge
+    let fatPercent;
+    if (objectif.includes("perte")) fatPercent = 0.22;
+    else if (objectif.includes("prise")) fatPercent = 0.28;
+    else fatPercent = 0.25;
+    if (!isMale) fatPercent += 0.03;
+    // Après 50 ans : légèrement plus de lipides (santé hormonale et cardiovasculaire)
+    if (age >= 50) fatPercent += 0.02;
+    const lipides = Math.round((calorieTarget * fatPercent) / 9);
 
-    const glucides = Math.round(remainingCalories / 4);
+    // GLUCIDES = calories restantes après protéines et lipides
+    const glucides = Math.round(Math.max(calorieTarget - (proteines * 4 + lipides * 9), 0) / 4);
 
     return {
         proteines,

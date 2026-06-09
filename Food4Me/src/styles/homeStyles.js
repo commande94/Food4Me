@@ -1320,7 +1320,7 @@ export const homeStyles = StyleSheet.create({
         paddingVertical: 6,
         paddingHorizontal: 10,
         borderRadius: 20,
-        alignSelf: "flex-start",
+        alignSelf: "center",
         marginTop: 10,
     },
 

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 
 import {
     View,
@@ -82,7 +82,7 @@ function CustomTabBar({ state, navigation }) {
 
                     else if (route.name === "Dashboard") {
                         iconName = isFocused ? "bar-chart" : "bar-chart-outline";
-                        label = "Progrès";
+                        label = "ProgrÃ¨s";
                     }
 
                     else if (route.name === "Add") {
@@ -91,12 +91,12 @@ function CustomTabBar({ state, navigation }) {
 
                     else if (route.name === "Meals") {
                         iconName = isFocused ? "restaurant" : "restaurant-outline";
-                        label = "Régimes";
+                        label = "RÃ©gimes";
                     }
 
                     else if (route.name === "Profile") {
                         iconName = isFocused ? "log-out" : "log-out-outline";
-                        label = "Déconnexion";
+                        label = "DÃ©connexion";
                     }
 
                     // BOUTON CENTRAL +
@@ -257,9 +257,9 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: 10,
-        marginTop: 2,   // 👈 proche de l’icône
+        marginTop: 2,   // ðŸ‘ˆ proche de lâ€™icÃ´ne
         color: "#000",
-        maxWidth: 70,      // ✅ empêche débordement horizontal
+        maxWidth: 70,      // âœ… empÃªche dÃ©bordement horizontal
         textAlign: "center",
         marginTop: 1,
     },

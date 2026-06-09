@@ -427,12 +427,10 @@ export default function RegisterScreen({ navigation }) {
                         <DateTimePicker
                             value={form.dateNaissance}
                             mode="date"
-                            display="spinner"
+                            display="default"
                             maximumDate={new Date()}
                             onChange={(e, date) => {
-
-                                if (date) {
-
+                                if (e.type === "set" && date) {
                                     updateField(
                                         "dateNaissance",
                                         date

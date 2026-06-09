@@ -276,7 +276,7 @@ export default function HomeScreen({ navigation }) {
 
             <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{
                 paddingTop: 100,
-                paddingBottom: 20
+                paddingBottom: 120
             }}>
                 {(dailyTotals || calorieTarget) && (
                     <View style={homeStyles.dashboardWrapper}>

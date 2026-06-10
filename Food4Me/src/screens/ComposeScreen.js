@@ -29,6 +29,7 @@ export default function ComposeScreen({ navigation, route }) {
     const [composeGrams, setComposeGrams] = useState("100");
     const [searching, setSearching] = useState(false);
     const [loadingDetail, setLoadingDetail] = useState(false);
+    const [saving, setSaving] = useState(false);
     // mode édition : inline edit quantité
     const [editingIndex, setEditingIndex] = useState(null);
     const [editingGrams, setEditingGrams] = useState("");
@@ -181,23 +182,23 @@ export default function ComposeScreen({ navigation, route }) {
     }, { cal: 0, prot: 0, glu: 0, lip: 0 });
 
     const handleSave = async () => {
+        if (saving) return;
         if (composeItems.length === 0) {
             Alert.alert("Erreur", "Ajoutez au moins un aliment.");
             return;
         }
 
+        setSaving(true);
         const mealName = composeNomRepas.trim() || generateMealName(composeItems);
 
         try {
             if (editMealId) {
-                // MODE ÉDITION — remplace la composition existante
                 await updateMealComposition(token, editMealId, {
                     nom_repas: mealName,
                     items: composeItems,
                 });
                 Alert.alert("Succès !", "Repas modifié !");
             } else {
-                // MODE CRÉATION — chaque ingrédient est stocké séparément
                 await createComposedMeal(token, {
                     nom_repas: mealName,
                     items: composeItems,
@@ -209,6 +210,8 @@ export default function ComposeScreen({ navigation, route }) {
             navigation.goBack();
         } catch (err) {
             Alert.alert("Erreur", "Le serveur est injoignable ou ne répond pas.");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -376,13 +379,18 @@ export default function ComposeScreen({ navigation, route }) {
                     <TouchableOpacity
                         style={[
                             globalStyles.button,
-                            { backgroundColor: composeItems.length > 0 ? "#2ecc71" : "#bdc3c7", marginTop: 15 }
+                            { backgroundColor: composeItems.length > 0 && !saving ? "#2ecc71" : "#bdc3c7", marginTop: 15 }
                         ]}
                         onPress={handleSave}
-                        disabled={composeItems.length === 0}
+                        disabled={composeItems.length === 0 || saving}
                     >
                         <Text style={globalStyles.buttonText}>
-                            {editMealId ? "💾 Enregistrer les modifications" : "💾 Enregistrer ce repas"}
+                            {saving
+                                ? "⏳ Enregistrement..."
+                                : editMealId
+                                    ? "💾 Enregistrer les modifications"
+                                    : "💾 Enregistrer ce repas"
+                            }
                         </Text>
                     </TouchableOpacity>
                 </View>

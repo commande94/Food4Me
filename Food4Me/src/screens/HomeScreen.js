@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, Alert, ScrollView, Image } from "react-native";
+import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getDailyTotals, getTodayMeals, deleteMeal } from "../services/foodService";
@@ -286,31 +286,8 @@ export default function HomeScreen({ navigation }) {
 
     return (
         <>
-            <View style={homeStyles.pageSplitWrapper} pointerEvents="none">
-                <View style={homeStyles.pageSplitTop} />
-                <View style={homeStyles.pageSplitBottom} />
-            </View>
-            <View style={homeStyles.topWrapper}>
-                <View style={homeStyles.topGradient} pointerEvents="none">
-                    <View style={homeStyles.gradLeft} />
-                    <View style={homeStyles.gradRight} />
-                </View>
-
-                <View style={[homeStyles.containerTop, { backgroundColor: 'transparent', zIndex: 2 }]}>
-                    <View style={homeStyles.topBox}>
-                        <View style={homeStyles.topLogoBg}>
-                            <Image
-                                source={require("../../assets/logo.png")}
-                                style={homeStyles.topLogo}
-                                resizeMode="contain"
-                            />
-                        </View>
-                    </View>
-                </View>
-            </View>
-
             <ScrollView style={{ flex: 1, backgroundColor: "#f9f9f9" }} contentContainerStyle={{
-                paddingTop: 100,
+                paddingTop: 20,
                 paddingBottom: 120
             }}>
                 {(dailyTotals || calorieTarget) && (

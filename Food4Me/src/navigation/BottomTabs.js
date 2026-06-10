@@ -4,7 +4,8 @@ import {
     View,
     TouchableOpacity,
     StyleSheet,
-    Text
+    Text,
+    Image
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -144,11 +145,22 @@ function CustomTabBar({ state, navigation }) {
                                 isFocused && styles.activeIconBox
                             ]}>
 
-                                <Ionicons
-                                    name={iconName}
-                                    size={20}
-                                    color="#000"
-                                />
+                                {route.name === "Home" ? (
+                                    <Image
+                                        source={require("../../assets/logo.png")}
+                                        style={[
+                                            styles.logoIcon,
+                                            isFocused && styles.logoIconActive
+                                        ]}
+                                        resizeMode="contain"
+                                    />
+                                ) : (
+                                    <Ionicons
+                                        name={iconName}
+                                        size={20}
+                                        color="#000"
+                                    />
+                                )}
 
                                 <Text style={[
                                     styles.label,
@@ -241,7 +253,7 @@ const styles = StyleSheet.create({
 
         paddingVertical: 4,
         overflow: "hidden",
-        paddingTop: 35,
+        paddingTop: 16,
     },
 
     addBox: {
@@ -251,7 +263,7 @@ const styles = StyleSheet.create({
 
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 25,
+        marginTop: 2,
         backgroundColor: "#4ADE80"
 
     },
@@ -263,9 +275,7 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: 10,
-        marginTop: 2,   // ðŸ‘ˆ proche de lâ€™icÃ´ne
         color: "#000",
-        maxWidth: 70,      // âœ… empÃªche dÃ©bordement horizontal
         textAlign: "center",
         marginTop: 1,
     },
@@ -274,5 +284,14 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
 
+    logoIcon: {
+        width: 22,
+        height: 22,
+        opacity: 0.5,
+    },
+
+    logoIconActive: {
+        opacity: 1,
+    },
 
 });
